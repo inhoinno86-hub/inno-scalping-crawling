@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /private
+Allow: /10.5555/fixture.scalping.2026

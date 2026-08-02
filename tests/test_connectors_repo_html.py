@@ -228,8 +228,8 @@ def test_run_briefing_uses_registry_collection_and_evaluates_robots_before_stora
             select(Document).where(Document.source_id == "fixture_atom_research")
         )
         assert atom_document is not None
-        assert atom_document.robots_allowed == "unknown"
-        assert atom_document.access_status == "denied"
+        assert atom_document.robots_allowed is True
+        assert atom_document.access_status == "allowed"
 
 
 def test_run_briefing_rejects_source_target_outside_registry_allowlist(

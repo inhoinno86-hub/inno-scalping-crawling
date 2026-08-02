@@ -36,6 +36,7 @@ sources:
     metadata:
       fixture_kind: rss_2_0
       response_file: tests/fixtures/sources/fixture_rss_blog/response.xml
+      robots_file: tests/fixtures/sources/fixture_rss_blog/robots.txt
 
   - source_id: fixture_atom_research
     name: Fixture Atom Research
@@ -72,6 +73,7 @@ sources:
       fixture_kind: atom
       response_file: tests/fixtures/sources/fixture_atom_research/response.xml
       headers_file: tests/fixtures/sources/fixture_atom_research/headers.json
+      robots_file: tests/fixtures/sources/fixture_atom_research/robots.txt
 
   - source_id: fixture_github_repo
     name: Fixture GitHub Repository
@@ -109,6 +111,7 @@ sources:
       releases_file: tests/fixtures/sources/fixture_github_repo/releases.json
       readme_file: tests/fixtures/sources/fixture_github_repo/readme.json
       cursor_type: commit_sha
+      robots_file: tests/fixtures/sources/fixture_github_repo/robots.txt
 
   - source_id: fixture_exchange_docs
     name: Fixture Exchange Technical Docs
@@ -178,6 +181,7 @@ sources:
     error_state: null
     original_url: https://doi.org/10.5555/fixture.scalping.2026
     metadata:
+      robots_file: tests/fixtures/sources/fixture_paper_meta/robots.txt
       fixture_kind: paper_metadata_json
       response_file: tests/fixtures/sources/fixture_paper_meta/response.json
 

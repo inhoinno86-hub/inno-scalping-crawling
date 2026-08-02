@@ -10,6 +10,183 @@
         "summary": "Recorded fixture response only.",
         "field_status": {"summary": "explicit"}
       }
+    },
+    "f1ec275a835f4409d8643a0d662c4a82c4667863d83e28c13a8b44a053e70560": {
+      "recorded_at": "2026-08-02T00:00:00Z",
+      "input_document_version_id": "fixture-document-version-1",
+      "model_name": "fixture",
+      "prompt_version": "phase2-extraction-v1",
+      "input_tokens": 83,
+      "output_tokens": 54,
+      "total_tokens": 137,
+      "estimated_cost_usd": 0.0,
+      "fixture_case": "normal",
+      "response": {
+        "candidate_id": "fixture-candidate-normal",
+        "canonical_name": "Queue Momentum",
+        "summary": "Short-horizon queue momentum candidate from recorded fixture material.",
+        "core_hypothesis": "Queue imbalance can precede short-horizon movement.",
+        "core_hypothesis_status": "explicit",
+        "signal_inputs": ["queue imbalance", "order book"],
+        "signal_inputs_status": "explicit",
+        "entry_logic": "Enter after the documented queue imbalance condition.",
+        "entry_logic_status": "explicit",
+        "exit_logic": "Exit on reversal or the documented holding timeout.",
+        "exit_logic_status": "explicit",
+        "required_data": ["L2 quotes", "trades"],
+        "required_data_status": "explicit",
+        "risk_notes": "Latency and adverse selection require review.",
+        "risk_notes_status": "explicit",
+        "field_status": {
+          "core_hypothesis": "explicit",
+          "signal_inputs": "explicit",
+          "entry_logic": "explicit",
+          "exit_logic": "explicit",
+          "required_data": "explicit",
+          "risk_notes": "explicit"
+        },
+        "relevance_status": "relevant",
+        "review_status": "needs_review",
+        "source_confidence": 0.9,
+        "extraction_confidence": 0.8,
+        "document_version_ids": ["fixture-document-version-1"],
+        "metadata": {
+          "fixture_case": "normal",
+          "evidence": [
+            {"field_name": "core_hypothesis", "quote": "Queue imbalance can precede short-horizon movement.", "section_or_locator": "Hypothesis", "document_version_id": "fixture-document-version-1"},
+            {"field_name": "signal_inputs", "quote": "queue imbalance and order book", "section_or_locator": "Signals", "document_version_id": "fixture-document-version-1"},
+            {"field_name": "entry_logic", "quote": "Enter after the documented queue imbalance condition.", "section_or_locator": "Entry", "document_version_id": "fixture-document-version-1"},
+            {"field_name": "exit_logic", "quote": "Exit on reversal or the documented holding timeout.", "section_or_locator": "Exit", "document_version_id": "fixture-document-version-1"},
+            {"field_name": "required_data", "quote": "L2 quotes and trades", "section_or_locator": "Data", "document_version_id": "fixture-document-version-1"},
+            {"field_name": "risk_notes", "quote": "Latency and adverse selection require review.", "section_or_locator": "Risks", "document_version_id": "fixture-document-version-1"}
+          ]
+        }
+      }
+    },
+    "f6049a1a21af1521ea74ffb74f3a4d956ca118bab2749f4b842e18883ce78982": {
+      "recorded_at": "2026-08-02T00:00:00Z",
+      "input_document_version_id": "fixture-document-version-schema-violation",
+      "model_name": "fixture",
+      "prompt_version": "phase2-extraction-v1",
+      "input_tokens": 45,
+      "output_tokens": 12,
+      "total_tokens": 57,
+      "estimated_cost_usd": 0.0,
+      "fixture_case": "schema_violation",
+      "response": {
+        "candidate_id": "fixture-candidate-schema-violation",
+        "canonical_name": "Invalid Fixture",
+        "summary": "This response intentionally contains an unsupported property.",
+        "unexpected_property": "reject me"
+      }
+    },
+    "83791270ccbacf942bcf4c895d319f5c406a98aca9e04c3a51bf9fab75f395bd": {
+      "recorded_at": "2026-08-02T00:00:00Z",
+      "input_document_version_id": "fixture-document-version-unknown",
+      "model_name": "fixture",
+      "prompt_version": "phase2-extraction-v1",
+      "input_tokens": 51,
+      "output_tokens": 44,
+      "total_tokens": 95,
+      "estimated_cost_usd": 0.0,
+      "fixture_case": "unknown",
+      "response": {
+        "candidate_id": "fixture-candidate-unknown",
+        "canonical_name": "Unspecified Fixture",
+        "summary": "Source material does not specify a reproducible strategy rule.",
+        "core_hypothesis": null,
+        "core_hypothesis_status": "unknown",
+        "signal_inputs": null,
+        "signal_inputs_status": "unknown",
+        "entry_logic": null,
+        "entry_logic_status": "unknown",
+        "exit_logic": null,
+        "exit_logic_status": "unknown",
+        "required_data": null,
+        "required_data_status": "unknown",
+        "risk_notes": null,
+        "risk_notes_status": "unknown",
+        "field_status": {
+          "core_hypothesis": "unknown",
+          "signal_inputs": "unknown",
+          "entry_logic": "unknown",
+          "exit_logic": "unknown",
+          "required_data": "unknown",
+          "risk_notes": "unknown"
+        },
+        "relevance_status": "relevant",
+        "review_status": "needs_review",
+        "source_confidence": null,
+        "extraction_confidence": 0.4,
+        "document_version_ids": ["fixture-document-version-unknown"],
+        "metadata": {"fixture_case": "unknown"}
+      }
+    },
+    "6bb9e497449083a3d4b456755d2fd450419c354dbe3115c31ad4182f20589e3f": {
+      "recorded_at": "2026-08-02T00:00:00Z",
+      "input_document_version_id": "fixture-document-version-conflicting",
+      "model_name": "fixture",
+      "prompt_version": "phase2-extraction-v1",
+      "input_tokens": 52,
+      "output_tokens": 48,
+      "total_tokens": 100,
+      "estimated_cost_usd": 0.0,
+      "fixture_case": "conflicting",
+      "response": {
+        "candidate_id": "fixture-candidate-conflicting",
+        "canonical_name": "Conflicting Queue Study",
+        "summary": "Recorded material contains opposing entry conditions.",
+        "core_hypothesis": "The source gives opposing hypotheses.",
+        "core_hypothesis_status": "conflicting",
+        "signal_inputs": ["queue imbalance"],
+        "signal_inputs_status": "explicit",
+        "entry_logic": "The source reports opposing entry conditions.",
+        "entry_logic_status": "conflicting",
+        "exit_logic": null,
+        "exit_logic_status": "unknown",
+        "required_data": ["order book"],
+        "required_data_status": "explicit",
+        "risk_notes": null,
+        "risk_notes_status": "unknown",
+        "field_status": {
+          "core_hypothesis": "conflicting",
+          "signal_inputs": "explicit",
+          "entry_logic": "conflicting",
+          "exit_logic": "unknown",
+          "required_data": "explicit",
+          "risk_notes": "unknown"
+        },
+        "relevance_status": "relevant",
+        "review_status": "needs_review",
+        "source_confidence": 0.7,
+        "extraction_confidence": 0.6,
+        "document_version_ids": ["fixture-document-version-conflicting"],
+        "metadata": {
+          "fixture_case": "conflicting",
+          "evidence": [
+            {"field_name": "core_hypothesis", "quote": "The source gives opposing hypotheses.", "section_or_locator": "Discussion", "document_version_id": "fixture-document-version-conflicting", "status": "conflicting"},
+            {"field_name": "entry_logic", "quote": "The source reports opposing entry conditions.", "section_or_locator": "Rules", "document_version_id": "fixture-document-version-conflicting", "status": "conflicting"},
+            {"field_name": "signal_inputs", "quote": "queue imbalance", "section_or_locator": "Signals", "document_version_id": "fixture-document-version-conflicting"},
+            {"field_name": "required_data", "quote": "order book", "section_or_locator": "Data", "document_version_id": "fixture-document-version-conflicting"}
+          ]
+        }
+      }
+    },
+    "270c81ecd5c7b8d9dccacbeff736e9c79eba4d7d52890e24fbdb07a3a04d69a7": {
+      "recorded_at": "2026-08-02T00:00:00Z",
+      "input_document_version_id": "fixture-document-version-1",
+      "model_name": "fixture",
+      "prompt_version": "phase2-classification-v1",
+      "input_tokens": 83,
+      "output_tokens": 12,
+      "total_tokens": 95,
+      "estimated_cost_usd": 0.0,
+      "fixture_case": "normal_classification",
+      "response": {
+        "relevance_status": "relevant",
+        "reason": "Short-horizon queue and order-book signals are in scope.",
+        "signals": ["short-horizon", "queue", "order book"]
+      }
     }
   }
 }
