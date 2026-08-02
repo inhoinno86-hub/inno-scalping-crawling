@@ -452,29 +452,34 @@ def _persist_source_cursor(session: Session, source: SourceRecord) -> None:
 def create_review_app(settings: Settings | None = None) -> Any:
     """Create minimal local review API app; import web framework lazily."""
 
+    active_settings = settings or load_config()
+    configured_token = active_settings.REVIEW_API_TOKEN
+    if not isinstance(configured_token, str) or not configured_token.strip():
+        raise RuntimeError("review-api requires REVIEW_API_TOKEN")
+
     try:
-        from fastapi import FastAPI, Header, HTTPException
+        from fastapi import Depends, FastAPI, Header, HTTPException
     except ImportError as exc:  # pragma: no cover - dependency installation issue
         raise RuntimeError("review-api requires fastapi") from exc
 
-    active_settings = settings or load_config()
     app = FastAPI(title="scalping-briefing review API", version=__version__)
 
-    @app.get("/health")
-    def health() -> dict[str, str]:
-        return {"status": "ok", "binding": active_settings.REVIEW_API_BIND}
-
-    @app.get("/reviews")
-    def reviews(
+    async def require_review_token(
         authorization: str | None = Header(default=None),
         x_review_token: str | None = Header(default=None),
-    ) -> dict[str, list[Any]]:
-        configured_token = active_settings.REVIEW_API_TOKEN
+    ) -> None:
         presented_token = x_review_token
         if presented_token is None and authorization and authorization.startswith("Bearer "):
             presented_token = authorization[7:]
-        if not configured_token or presented_token != configured_token:
+        if presented_token != configured_token:
             raise HTTPException(status_code=401, detail="review token required")
+
+    @app.get("/health")
+    async def health() -> dict[str, str]:
+        return {"status": "ok", "binding": active_settings.REVIEW_API_BIND}
+
+    @app.get("/reviews", dependencies=[Depends(require_review_token)])
+    async def reviews() -> dict[str, list[Any]]:
         return {"reviews": []}
 
     return app

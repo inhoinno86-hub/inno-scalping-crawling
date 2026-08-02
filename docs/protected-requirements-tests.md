@@ -1,6 +1,6 @@
 # Protected requirement test map
 
-P1–P10 are protected requirements from the project intent. Every entry below is a real pytest node ID collected by the default test configuration. The mapping records both the safety boundary and its executable check.
+P1–P16 are protected requirements from the project intent. Every entry below is a real pytest node ID collected by the default test configuration. The mapping records both the safety boundary and its executable check.
 
 | Requirement | pytest node IDs | Coverage |
 | --- | --- | --- |
@@ -14,5 +14,11 @@ P1–P10 are protected requirements from the project intent. Every entry below i
 | P8 | `tests/test_models_migrations.py::test_delivery_guard_rejects_success_resend_without_two_part_approval`; `tests/test_protected_mapping.py::test_delivery_idempotency_requires_approval` | Idempotency key and approved-resend safeguards prevent duplicate delivery. |
 | P9 | `tests/test_config.py::test_defaults_cover_appendix_a_and_are_safe`; `tests/test_config.py::test_explicit_approval_is_call_scoped`; `tests/test_protected_mapping.py::test_run_briefing_is_fixture_dry_run` | Safe defaults, scoped approvals, fixture-only collection, and no delivery invocation. |
 | P10 | `tests/test_logging_setup.py::test_environment_secret_is_masked_even_inside_message`; `tests/test_protected_mapping.py::test_no_literal_secrets_in_repository` | Secret values are masked and literal credentials are absent from repository files. |
+| P11 | `tests/test_protected_p11_p16.py::test_p11_schema_invalid_llm_output_is_rejected_before_storage` | Schema-invalid LLM output is rejected before candidate storage. |
+| P12 | `tests/test_protected_p11_p16.py::test_p12_unverified_llm_output_is_not_stored_unchanged` | Unsupported claims are downgraded to `unknown` and `needs_review` instead of being stored unchanged. |
+| P13 | `tests/test_protected_p11_p16.py::test_p13_llm_call_is_recorded_in_audit_log` | LLM model, prompt, timing, document version, token, cost, and hash metadata are audited. |
+| P14 | `tests/test_protected_p11_p16.py::test_p14_unsupported_value_score_is_rejected_and_breakdown_is_saved` | Unsupported scores are rejected; accepted value scores retain criterion-level reasons. |
+| P15 | `tests/test_protected_p11_p16.py::test_p15_borderline_low_confidence_and_conflicting_cases_need_review` | Borderline scores, low confidence, and conflicting core fields force `needs_review`. |
+| P16 | `tests/test_protected_p11_p16.py::test_p16_review_app_fails_before_startup_without_token` | Review API creation fails before startup when the token is unset or empty. |
 
 The mapping test checks these strings against `pytest --collect-only`, so a renamed or deleted node fails the mapping rather than silently weakening coverage.

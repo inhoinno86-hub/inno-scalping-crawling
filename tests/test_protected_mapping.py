@@ -54,6 +54,24 @@ MAPPING = {
         "tests/test_logging_setup.py::test_environment_secret_is_masked_even_inside_message",
         "tests/test_protected_mapping.py::test_no_literal_secrets_in_repository",
     ),
+    "P11": (
+        "tests/test_protected_p11_p16.py::test_p11_schema_invalid_llm_output_is_rejected_before_storage",
+    ),
+    "P12": (
+        "tests/test_protected_p11_p16.py::test_p12_unverified_llm_output_is_not_stored_unchanged",
+    ),
+    "P13": (
+        "tests/test_protected_p11_p16.py::test_p13_llm_call_is_recorded_in_audit_log",
+    ),
+    "P14": (
+        "tests/test_protected_p11_p16.py::test_p14_unsupported_value_score_is_rejected_and_breakdown_is_saved",
+    ),
+    "P15": (
+        "tests/test_protected_p11_p16.py::test_p15_borderline_low_confidence_and_conflicting_cases_need_review",
+    ),
+    "P16": (
+        "tests/test_protected_p11_p16.py::test_p16_review_app_fails_before_startup_without_token",
+    ),
 }
 
 
@@ -75,7 +93,7 @@ def test_protected_mapping_references_real_pytest_nodes() -> None:
         encoding="utf-8"
     )
     collected = _collected_nodes()
-    assert set(MAPPING) == {f"P{number}" for number in range(1, 11)}
+    assert set(MAPPING) == {f"P{number}" for number in range(1, 17)}
     for requirement, nodes in MAPPING.items():
         assert requirement in document
         for node in nodes:

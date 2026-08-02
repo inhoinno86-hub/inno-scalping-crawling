@@ -10,6 +10,7 @@ from scalping_briefing.pipeline.evidence_link import (
     EvidenceLinkError,
     link_evidence,
 )
+from scalping_briefing.pipeline.validate import CORE_FIELDS, validate_extracted_candidate
 
 
 SOURCE_TEXT = (
@@ -32,8 +33,10 @@ CORE_SOURCE_TEXT = " ".join(CORE_FIELD_QUOTES.values())
 def _version(*, text: str = SOURCE_TEXT, version_id: str = "dv-1") -> dict[str, object]:
     return {
         "document_version_id": version_id,
+        "processing_status": "extracted",
         "normalized_text": text,
         "canonical_url": "https://example.invalid/document",
+        "metadata": {},
     }
 
 
@@ -48,6 +51,33 @@ def _quote(field_name: str, quote: str, *, version_id: str = "dv-1") -> dict[str
 
 def _provenance(*entries: dict[str, object]) -> dict[str, object]:
     return {"accepted_quotes": [{**entry, "accepted": True} for entry in entries]}
+
+
+def _candidate(*, version_id: str = "dv-1") -> dict[str, object]:
+    return {
+        "candidate_id": "candidate-1",
+        "canonical_name": "Queue Momentum",
+        "summary": "A short-horizon queue observation.",
+        "core_hypothesis": CORE_FIELD_QUOTES["core_hypothesis"],
+        "core_hypothesis_status": "explicit",
+        "signal_inputs": ["queue imbalance", "trade flow"],
+        "signal_inputs_status": "explicit",
+        "entry_logic": CORE_FIELD_QUOTES["entry_logic"],
+        "entry_logic_status": "explicit",
+        "exit_logic": CORE_FIELD_QUOTES["exit_logic"],
+        "exit_logic_status": "explicit",
+        "required_data": ["level-two quotes"],
+        "required_data_status": "explicit",
+        "risk_notes": CORE_FIELD_QUOTES["risk_notes"],
+        "risk_notes_status": "explicit",
+        "field_status": {field: "explicit" for field in CORE_FIELDS},
+        "relevance_status": "relevant",
+        "review_status": "needs_review",
+        "source_confidence": 0.9,
+        "extraction_confidence": 0.8,
+        "document_version_ids": [version_id],
+        "metadata": {},
+    }
 
 
 @pytest.mark.parametrize(
@@ -163,3 +193,31 @@ def test_quote_limits_reject_field_and_item_overflow_and_configured_length(
             quotes=[long_quote],
             extraction_provenance=_provenance(long_quote),
         )
+
+
+def test_candidate_without_any_evidence_never_reaches_validated() -> None:
+    version = _version(text=CORE_SOURCE_TEXT)
+
+    result = validate_extracted_candidate(version, _candidate(), [])
+
+    assert result.valid is False
+    assert result.processing_status == "failed"
+    assert version["processing_status"] == "failed"
+    assert result.error_class == "evidence_contract_failed"
+    assert version["metadata"]["validation"]["error_class"] == (  # type: ignore[index]
+        "evidence_contract_failed"
+    )
+
+
+def test_candidate_with_partial_evidence_keeps_unevidenced_field_unpublishable() -> None:
+    version = _version(text=CORE_SOURCE_TEXT)
+    evidence = [_quote("core_hypothesis", CORE_FIELD_QUOTES["core_hypothesis"])]
+
+    result = validate_extracted_candidate(version, _candidate(), evidence)
+
+    assert result.valid is True
+    assert result.processing_status == "validated"
+    assert result.publishable_fields == ("core_hypothesis",)
+    assert set(result.excluded_fields) == set(CORE_FIELDS) - {"core_hypothesis"}
+    assert "entry_logic" not in result.publishable_fields
+    assert "entry_logic" in result.excluded_fields

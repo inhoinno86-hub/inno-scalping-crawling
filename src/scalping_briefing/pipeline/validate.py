@@ -678,6 +678,10 @@ def validate_extracted_candidate(
             for field_name in CORE_FIELDS
             if field_name not in publishable_fields
         )
+        if not evidence_rows or not publishable_fields:
+            raise EvidenceValidationError(
+                "candidate requires Evidence for at least one publishable core field"
+            )
         _record_success(
             document_version,
             candidate_id=candidate_id,

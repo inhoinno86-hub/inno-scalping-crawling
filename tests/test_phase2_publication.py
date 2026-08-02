@@ -181,17 +181,22 @@ def test_core_field_without_evidence_is_excluded_from_publishable_fields() -> No
     ]
 
 
-def test_candidate_with_no_evidence_remains_validated_but_not_publishable() -> None:
+def test_candidate_with_no_evidence_is_failed_and_not_publishable() -> None:
     version = _version()
 
     result = validate_extracted_candidate(version, _payload(), [])
 
-    assert result.valid is True
-    assert result.processing_status == "validated"
+    assert result.valid is False
+    assert result.processing_status == "failed"
+    assert version["processing_status"] == "failed"
     assert result.evidence == []
     assert result.publishable is False
     assert result.publishable_fields == ()
     assert result.excluded_fields == CORE_FIELDS
+    assert result.error_class == "evidence_contract_failed"
+
+    with pytest.raises(MissingEvidenceError):
+        build_candidate_view(_payload(), [])
 
 
 def test_evidence_in_candidate_metadata_is_validated_when_argument_is_omitted() -> None:
