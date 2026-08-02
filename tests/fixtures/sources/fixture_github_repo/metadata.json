@@ -1,0 +1,17 @@
+{
+  "source_id": "fixture_github_repo",
+  "captured_at": "2026-07-01T01:10:00Z",
+  "recorded_at": "2026-07-01T01:10:00Z",
+  "original_url": "https://api.github.com/repos/example/scalping-fixture",
+  "response_files": ["releases.json", "readme.json"],
+  "content_type": "application/json",
+  "status_code": 200,
+  "robots_allowed": true,
+  "robots_rule_matched": null,
+  "robots_evaluated_at": null,
+  "access_decision_reason": "static API fixture is allowlisted",
+  "terms_reference": "fixture-only",
+  "license": "fixture-only",
+  "rate_limit": {"requests_per_minute": 60, "burst": 1, "retry_after_seconds": 1},
+  "cursor": "9fceb02fixture"
+}

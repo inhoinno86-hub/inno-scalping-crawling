@@ -1,0 +1,16 @@
+{
+  "source_id": "fixture_rss_blog",
+  "captured_at": "2026-07-01T01:00:00Z",
+  "recorded_at": "2026-07-01T01:00:00Z",
+  "original_url": "https://example.invalid/research/rss",
+  "response_file": "response.xml",
+  "content_type": "application/rss+xml",
+  "status_code": 200,
+  "robots_allowed": true,
+  "robots_rule_matched": null,
+  "robots_evaluated_at": "2026-07-01T00:59:00Z",
+  "access_decision_reason": "static fixture is allowlisted",
+  "terms_reference": "fixture-only",
+  "license": "fixture-only",
+  "rate_limit": {"requests_per_minute": 60, "burst": 1, "retry_after_seconds": 1}
+}

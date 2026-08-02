@@ -1,0 +1,17 @@
+{
+  "source_id": "fixture_exchange_docs",
+  "captured_at": "2026-07-01T01:15:00Z",
+  "recorded_at": "2026-07-01T01:15:00Z",
+  "original_url": "https://example.invalid/private/scalping.html",
+  "response_file": "response.html",
+  "robots_file": "robots.txt",
+  "content_type": "text/html",
+  "status_code": 200,
+  "robots_allowed": false,
+  "robots_rule_matched": "/private",
+  "robots_evaluated_at": "2026-07-01T01:14:00Z",
+  "access_decision_reason": "robots.txt disallows /private; body must not be stored",
+  "terms_reference": "fixture-only",
+  "license": "fixture-only",
+  "rate_limit": {"requests_per_minute": 60, "burst": 1, "retry_after_seconds": 1}
+}

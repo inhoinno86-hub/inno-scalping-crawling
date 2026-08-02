@@ -1,0 +1,24 @@
+# Local secrets. Keep the committed example visible.
+.env
+.env.*
+!.env.example
+
+# Runtime artifacts. Only the directory marker is tracked.
+storage/
+!storage/
+storage/*
+!storage/.gitkeep
+alerts/
+!alerts/
+alerts/*
+!alerts/.gitkeep
+data/
+!data/
+data/*
+!data/.gitkeep
+
+*.sqlite3
+__pycache__/
+.loop-engine/
+.venv/
+.pytest_cache/

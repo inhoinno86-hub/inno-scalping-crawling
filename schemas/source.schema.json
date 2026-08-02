@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scalping-briefing.local/schema/source.json",
+  "title": "Source",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_id",
+    "name",
+    "type",
+    "base_url",
+    "connector_type",
+    "active",
+    "access_policy",
+    "robots_allowed",
+    "robots_rule_matched",
+    "robots_evaluated_at",
+    "terms_reference",
+    "license_notes",
+    "rate_limit"
+  ],
+  "properties": {
+    "source_id": {"type": "string", "minLength": 1, "pattern": "^[a-z0-9][a-z0-9_-]*$"},
+    "name": {"type": "string", "minLength": 1},
+    "type": {"type": "string", "minLength": 1},
+    "base_url": {"type": "string", "minLength": 1, "format": "uri"},
+    "connector_type": {"type": "string", "enum": ["rss", "atom", "github_api", "html", "paper_metadata"]},
+    "active": {"type": "boolean"},
+    "fixture": {"type": "boolean"},
+    "access_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["robots", "terms", "license", "rate_limit"],
+      "properties": {
+        "robots": {"type": "string", "enum": ["required", "not_applicable"]},
+        "terms": {"type": "string", "minLength": 1},
+        "license": {"type": "string", "minLength": 1},
+        "rate_limit": {"type": "string", "minLength": 1},
+        "user_agent": {"type": "string", "minLength": 1},
+        "allowlist": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "robots_allowed": {"type": ["boolean", "string"], "enum": [true, false, "unknown"]},
+    "robots_rule_matched": {"type": ["string", "null"]},
+    "robots_evaluated_at": {"type": ["string", "null"], "format": "date-time"},
+    "access_decision_reason": {"type": "string", "minLength": 1},
+    "terms_reference": {"type": "string", "minLength": 1},
+    "license_notes": {"type": "string", "minLength": 1},
+    "rate_limit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requests_per_minute", "burst", "retry_after_seconds"],
+      "properties": {
+        "requests_per_minute": {"type": "integer", "minimum": 0},
+        "burst": {"type": "integer", "minimum": 0},
+        "retry_after_seconds": {"type": "integer", "minimum": 0},
+        "max_concurrency": {"type": "integer", "minimum": 1}
+      }
+    },
+    "schedule": {"type": ["string", "array", "null"], "items": {"type": "string"}},
+    "last_success_at": {"type": ["string", "null"], "format": "date-time"},
+    "cursor": {"type": ["string", "null"]},
+    "trust_tier": {"type": "string", "enum": ["tier_1", "tier_2", "tier_3", "unknown"]},
+    "error_state": {"type": ["object", "null"]},
+    "original_url": {"type": "string", "format": "uri"},
+    "metadata": {"type": "object"}
+  }
+}

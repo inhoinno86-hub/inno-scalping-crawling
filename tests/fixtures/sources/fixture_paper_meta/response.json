@@ -1,0 +1,13 @@
+{
+  "message": {
+    "DOI": "10.5555/fixture.scalping.2026",
+    "title": ["A Fixture Study of Short-Horizon Order Flow"],
+    "author": [{"given": "Fixture", "family": "Researcher"}],
+    "published": {"date-parts": [[2026, 6, 28]]},
+    "URL": "https://doi.org/10.5555/fixture.scalping.2026",
+    "license": [{"URL": "https://creativecommons.org/licenses/by/4.0/"}],
+    "abstract": "Metadata-only fixture. The abstract describes a reproducible short-horizon observation."
+  },
+  "captured_at": "2026-07-01T01:20:00Z",
+  "original_url": "https://doi.org/10.5555/fixture.scalping.2026"
+}

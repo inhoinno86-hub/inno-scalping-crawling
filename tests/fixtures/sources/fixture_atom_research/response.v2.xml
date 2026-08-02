@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <id>https://example.invalid/research/atom</id>
+  <title>Fixture Atom Research</title>
+  <updated>2026-07-02T01:05:00Z</updated>
+  <entry>
+    <id>urn:fixture:atom:order-flow-1</id>
+    <title>Order Flow Imbalance Study</title>
+    <link href="https://example.invalid/research/order-flow-imbalance" />
+    <updated>2026-07-01T04:00:00Z</updated>
+    <summary>Atom fixture v2 with refreshed conditional-request metadata.</summary>
+  </entry>
+  <entry>
+    <id>urn:fixture:atom:mean-reversion-1</id>
+    <title>Microstructure Mean Reversion</title>
+    <link href="https://example.invalid/research/microstructure-mean-reversion" />
+    <updated>2026-06-29T04:00:00Z</updated>
+    <summary>Short-horizon research metadata.</summary>
+  </entry>
+</feed>

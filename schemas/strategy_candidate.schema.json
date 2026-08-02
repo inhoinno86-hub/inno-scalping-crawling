@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scalping-briefing.local/schema/strategy-candidate.json",
+  "title": "Strategy Candidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "candidate_id",
+    "canonical_name",
+    "summary",
+    "core_hypothesis",
+    "core_hypothesis_status",
+    "signal_inputs",
+    "signal_inputs_status",
+    "entry_logic",
+    "entry_logic_status",
+    "exit_logic",
+    "exit_logic_status",
+    "required_data",
+    "required_data_status",
+    "risk_notes",
+    "risk_notes_status",
+    "field_status",
+    "relevance_status",
+    "review_status",
+    "source_confidence",
+    "extraction_confidence"
+  ],
+  "properties": {
+    "candidate_id": {"type": "string", "minLength": 1},
+    "strategy_id": {"type": ["string", "null"]},
+    "canonical_name": {"type": "string", "minLength": 1},
+    "aliases": {"type": "array", "items": {"type": "string"}},
+    "summary": {"type": "string", "minLength": 1},
+    "asset_classes": {"type": "array", "items": {"type": "string"}},
+    "market_types": {"type": "array", "items": {"type": "string"}},
+    "strategy_families": {"type": "array", "items": {"type": "string"}},
+    "holding_horizon": {"type": "string"},
+    "microstructure_level": {"type": "string"},
+    "tags": {"type": "array", "items": {"type": "string"}},
+    "core_hypothesis": {"$ref": "#/$defs/nullable_text"},
+    "core_hypothesis_status": {"$ref": "#/$defs/field_status_value"},
+    "signal_inputs": {"$ref": "#/$defs/nullable_text_list"},
+    "signal_inputs_status": {"$ref": "#/$defs/field_status_value"},
+    "entry_logic": {"$ref": "#/$defs/nullable_text"},
+    "entry_logic_status": {"$ref": "#/$defs/field_status_value"},
+    "exit_logic": {"$ref": "#/$defs/nullable_text"},
+    "exit_logic_status": {"$ref": "#/$defs/field_status_value"},
+    "required_data": {"$ref": "#/$defs/nullable_text_list"},
+    "required_data_status": {"$ref": "#/$defs/field_status_value"},
+    "required_frequency": {"type": "string"},
+    "risk_notes": {"$ref": "#/$defs/nullable_text"},
+    "risk_notes_status": {"$ref": "#/$defs/field_status_value"},
+    "relevance_status": {"type": "string", "enum": ["relevant", "irrelevant", "background_only", "unknown"]},
+    "review_status": {"type": "string", "enum": ["pending", "needs_review", "approved", "rejected", "archived"]},
+    "field_status": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"$ref": "#/$defs/field_status_value"}
+    },
+    "source_confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "extraction_confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "value_score": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+    "value_score_breakdown": {"type": "object"},
+    "novelty_status": {"type": "string", "enum": ["new", "new_evidence", "changed", "variant", "duplicate", "unknown"]},
+    "related_strategy_ids": {"type": "array", "items": {"type": "string"}},
+    "document_version_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "metadata": {"type": "object"}
+  },
+  "$defs": {
+    "field_status_value": {
+      "type": "string",
+      "enum": ["explicit", "inferred", "unknown", "conflicting", "not_applicable"]
+    },
+    "nullable_text": {
+      "type": ["string", "null"]
+    },
+    "nullable_text_list": {
+      "type": ["array", "null"],
+      "items": {"type": "string", "minLength": 1}
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"core_hypothesis": {"anyOf": [{"const": ""}, {"type": "null"}]}}},
+      "then": {"properties": {"core_hypothesis_status": {"const": "unknown"}}}
+    },
+    {
+      "if": {"properties": {"signal_inputs": {"anyOf": [{"const": []}, {"type": "null"}]}}},
+      "then": {"properties": {"signal_inputs_status": {"const": "unknown"}}}
+    },
+    {
+      "if": {"properties": {"entry_logic": {"anyOf": [{"const": ""}, {"type": "null"}]}}},
+      "then": {"properties": {"entry_logic_status": {"const": "unknown"}}}
+    },
+    {
+      "if": {"properties": {"exit_logic": {"anyOf": [{"const": ""}, {"type": "null"}]}}},
+      "then": {"properties": {"exit_logic_status": {"const": "unknown"}}}
+    },
+    {
+      "if": {"properties": {"required_data": {"anyOf": [{"const": []}, {"type": "null"}]}}},
+      "then": {"properties": {"required_data_status": {"const": "unknown"}}}
+    },
+    {
+      "if": {"properties": {"risk_notes": {"anyOf": [{"const": ""}, {"type": "null"}]}}},
+      "then": {"properties": {"risk_notes_status": {"const": "unknown"}}}
+    }
+  ]
+}

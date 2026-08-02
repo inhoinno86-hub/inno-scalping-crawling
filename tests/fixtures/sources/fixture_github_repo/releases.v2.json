@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1001,
+    "tag_name": "v1.1.0",
+    "name": "Queue momentum update",
+    "created_at": "2026-06-30T05:00:00Z",
+    "published_at": "2026-06-30T05:10:00Z",
+    "html_url": "https://github.com/example/scalping-fixture/releases/tag/v1.1.0",
+    "target_commitish": "a4f1c6e7d8b90123456789abcdef0123456789ab",
+    "body": "Updated queue features, a shorter holding horizon, and revised fixture cursor."
+  },
+  {
+    "id": 1002,
+    "tag_name": "v1.2.0",
+    "name": "Latency budget addendum",
+    "created_at": "2026-07-01T05:00:00Z",
+    "published_at": "2026-07-01T05:10:00Z",
+    "html_url": "https://github.com/example/scalping-fixture/releases/tag/v1.2.0",
+    "target_commitish": "b5f2d7f8e9c00123456789abcdef0123456789ab",
+    "body": "Adds latency budget notes to the offline fixture release."
+  }
+]

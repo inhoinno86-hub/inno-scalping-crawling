@@ -1,0 +1,15 @@
+{
+  "recording_version": 1,
+  "recorded_at": "2026-07-01T00:00:00Z",
+  "mappings": {
+    "7fbb149349a621210d38c3e56d1478e442619b31f24b03c66eaf6bc623b745d5": {
+      "recorded_at": "2026-07-01T00:00:00Z",
+      "input_document_version_id": "fixture-document-version-1",
+      "response": {
+        "relevance_status": "relevant",
+        "summary": "Recorded fixture response only.",
+        "field_status": {"summary": "explicit"}
+      }
+    }
+  }
+}

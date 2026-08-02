@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scalping-briefing.local/schema/delivery.json",
+  "title": "Delivery Attempt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["delivery_id", "briefing_id", "channel", "idempotency_key", "attempt_no", "attempted_at", "status"],
+  "properties": {
+    "delivery_id": {"type": "string", "minLength": 1},
+    "briefing_id": {"type": "string", "minLength": 1},
+    "channel": {"type": "string", "minLength": 1},
+    "idempotency_key": {"type": "string", "minLength": 5, "pattern": "^[^:\\s]+:[^:\\s]+:[^:\\s]+$"},
+    "content_hash": {"type": "string", "minLength": 1},
+    "attempt_no": {"type": "integer", "minimum": 1},
+    "resend_reason": {"type": ["string", "null"]},
+    "resend_approved_by": {"type": ["string", "null"]},
+    "attempted_at": {"type": "string", "format": "date-time"},
+    "status": {"type": "string", "enum": ["pending", "success", "failed", "rejected"]},
+    "provider_reference": {"type": ["string", "null"]},
+    "error": {"type": ["string", "null"]}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"attempt_no": {"minimum": 2}}},
+      "then": {"required": ["resend_reason", "resend_approved_by"]}
+    }
+  ]
+}

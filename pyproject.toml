@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scalping-briefing"
+version = "0.1.0"
+description = "Offline-first scalping strategy research briefing foundation"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.100",
+  "uvicorn>=0.23",
+  "sqlalchemy>=2.0",
+  "alembic>=1.12",
+  "pydantic>=2.0",
+  "httpx>=0.24",
+  "jsonschema>=4.0",
+  "feedparser>=6.0",
+  "bleach>=6.0",
+  "pytest>=7.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-m 'not integration'"
+markers = [
+  "integration: tests that require network, Docker, or external services",
+]

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scalping-briefing.local/schema/evidence.json",
+  "title": "Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["evidence_id", "document_version_id", "strategy_candidate_id", "field_name", "quote", "section_or_locator", "captured_at"],
+  "properties": {
+    "evidence_id": {"type": "string", "minLength": 1},
+    "document_version_id": {"type": "string", "minLength": 1},
+    "strategy_candidate_id": {"type": "string", "minLength": 1},
+    "field_name": {"type": "string", "minLength": 1},
+    "quote": {"type": "string", "minLength": 1, "maxLength": 300},
+    "section_or_locator": {"type": "string", "minLength": 1},
+    "captured_at": {"type": "string", "format": "date-time"},
+    "source_url": {"type": "string", "format": "uri"},
+    "metadata": {"type": "object"}
+  }
+}

@@ -1,0 +1,347 @@
+policy_version: 1
+source_schema: schemas/source.schema.json
+default_user_agent: scalping-briefing-fixture/0.1 (+offline-test)
+sources:
+  - source_id: fixture_rss_blog
+    name: Fixture RSS Blog
+    type: rss_blog
+    base_url: fixture://fixture_rss_blog
+    connector_type: rss
+    active: true
+    fixture: true
+    access_policy:
+      robots: required
+      terms: tests/fixtures/sources/fixture_rss_blog/metadata.json
+      license: fixture-only; no external redistribution
+      rate_limit: offline fixture; one request per run
+      user_agent: scalping-briefing-fixture/0.1
+      allowlist: [fixture://fixture_rss_blog]
+    robots_allowed: true
+    robots_rule_matched: null
+    robots_evaluated_at: "2026-07-01T00:00:00Z"
+    access_decision_reason: static fixture is explicitly allowlisted
+    terms_reference: tests/fixtures/sources/fixture_rss_blog/metadata.json
+    license_notes: Fixture response for tests only; retain source URL metadata.
+    rate_limit:
+      requests_per_minute: 60
+      burst: 1
+      retry_after_seconds: 1
+      max_concurrency: 1
+    schedule: "fixture"
+    last_success_at: null
+    cursor: null
+    trust_tier: tier_3
+    error_state: null
+    original_url: https://example.invalid/research/rss
+    metadata:
+      fixture_kind: rss_2_0
+      response_file: tests/fixtures/sources/fixture_rss_blog/response.xml
+
+  - source_id: fixture_atom_research
+    name: Fixture Atom Research
+    type: atom_research
+    base_url: fixture://fixture_atom_research
+    connector_type: atom
+    active: true
+    fixture: true
+    access_policy:
+      robots: required
+      terms: tests/fixtures/sources/fixture_atom_research/metadata.json
+      license: fixture-only; no external redistribution
+      rate_limit: offline fixture; one request per run
+      user_agent: scalping-briefing-fixture/0.1
+      allowlist: [fixture://fixture_atom_research]
+    robots_allowed: true
+    robots_rule_matched: null
+    robots_evaluated_at: "2026-07-01T00:00:00Z"
+    access_decision_reason: static fixture is explicitly allowlisted
+    terms_reference: tests/fixtures/sources/fixture_atom_research/metadata.json
+    license_notes: Fixture response for tests only; retain source URL metadata.
+    rate_limit:
+      requests_per_minute: 60
+      burst: 1
+      retry_after_seconds: 1
+      max_concurrency: 1
+    schedule: "fixture"
+    last_success_at: null
+    cursor: null
+    trust_tier: tier_3
+    error_state: null
+    original_url: https://example.invalid/research/atom
+    metadata:
+      fixture_kind: atom
+      response_file: tests/fixtures/sources/fixture_atom_research/response.xml
+      headers_file: tests/fixtures/sources/fixture_atom_research/headers.json
+
+  - source_id: fixture_github_repo
+    name: Fixture GitHub Repository
+    type: github_repository
+    base_url: fixture://fixture_github_repo
+    connector_type: github_api
+    active: true
+    fixture: true
+    access_policy:
+      robots: not_applicable
+      terms: tests/fixtures/sources/fixture_github_repo/metadata.json
+      license: fixture-only; no external redistribution
+      rate_limit: offline fixture; one request per run
+      user_agent: scalping-briefing-fixture/0.1
+      allowlist: [fixture://fixture_github_repo]
+    robots_allowed: true
+    robots_rule_matched: null
+    robots_evaluated_at: null
+    access_decision_reason: static API fixture is explicitly allowlisted
+    terms_reference: tests/fixtures/sources/fixture_github_repo/metadata.json
+    license_notes: Fixture response for tests only; retain repository URL metadata.
+    rate_limit:
+      requests_per_minute: 60
+      burst: 1
+      retry_after_seconds: 1
+      max_concurrency: 1
+    schedule: "fixture"
+    last_success_at: null
+    cursor: null
+    trust_tier: tier_3
+    error_state: null
+    original_url: https://api.github.com/repos/example/scalping-fixture
+    metadata:
+      fixture_kind: github_release_and_readme
+      releases_file: tests/fixtures/sources/fixture_github_repo/releases.json
+      readme_file: tests/fixtures/sources/fixture_github_repo/readme.json
+      cursor_type: commit_sha
+
+  - source_id: fixture_exchange_docs
+    name: Fixture Exchange Technical Docs
+    type: exchange_docs
+    base_url: fixture://fixture_exchange_docs
+    connector_type: html
+    active: true
+    fixture: true
+    access_policy:
+      robots: required
+      terms: tests/fixtures/sources/fixture_exchange_docs/metadata.json
+      license: fixture-only; no external redistribution
+      rate_limit: offline fixture; one request per run
+      user_agent: scalping-briefing-fixture/0.1
+      allowlist: [fixture://fixture_exchange_docs]
+    robots_allowed: true
+    robots_rule_matched: null
+    robots_evaluated_at: "2026-07-01T00:00:00Z"
+    access_decision_reason: source allowlisted; path-level robots decision belongs to response metadata
+    terms_reference: tests/fixtures/sources/fixture_exchange_docs/metadata.json
+    license_notes: Fixture response for tests only; HTML is untrusted input.
+    rate_limit:
+      requests_per_minute: 60
+      burst: 1
+      retry_after_seconds: 1
+      max_concurrency: 1
+    schedule: "fixture"
+    last_success_at: null
+    cursor: null
+    trust_tier: tier_3
+    error_state: null
+    original_url: https://example.invalid/private/scalping.html
+    metadata:
+      fixture_kind: html_with_malicious_markup_and_prompt_injection
+      response_file: tests/fixtures/sources/fixture_exchange_docs/response.html
+      robots_file: tests/fixtures/sources/fixture_exchange_docs/robots.txt
+
+  - source_id: fixture_paper_meta
+    name: Fixture Paper Metadata
+    type: paper_metadata
+    base_url: fixture://fixture_paper_meta
+    connector_type: paper_metadata
+    active: true
+    fixture: true
+    access_policy:
+      robots: not_applicable
+      terms: tests/fixtures/sources/fixture_paper_meta/metadata.json
+      license: fixture-only; no external redistribution
+      rate_limit: offline fixture; one request per run
+      user_agent: scalping-briefing-fixture/0.1
+      allowlist: [fixture://fixture_paper_meta]
+    robots_allowed: true
+    robots_rule_matched: null
+    robots_evaluated_at: null
+    access_decision_reason: static metadata fixture is explicitly allowlisted
+    terms_reference: tests/fixtures/sources/fixture_paper_meta/metadata.json
+    license_notes: Fixture response for tests only; abstract metadata only.
+    rate_limit:
+      requests_per_minute: 60
+      burst: 1
+      retry_after_seconds: 1
+      max_concurrency: 1
+    schedule: "fixture"
+    last_success_at: null
+    cursor: null
+    trust_tier: tier_3
+    error_state: null
+    original_url: https://doi.org/10.5555/fixture.scalping.2026
+    metadata:
+      fixture_kind: paper_metadata_json
+      response_file: tests/fixtures/sources/fixture_paper_meta/response.json
+
+  - source_id: real_arxiv_api
+    name: arXiv API Candidate
+    type: research_api
+    base_url: https://export.arxiv.org
+    connector_type: atom
+    active: false
+    fixture: false
+    access_policy:
+      robots: required
+      terms: https://info.arxiv.org/help/api/
+      license: arXiv terms and source-specific license review required
+      rate_limit: operator approval required before activation
+      user_agent: scalping-briefing/0.1 (approval required)
+      allowlist: [https://export.arxiv.org]
+    robots_allowed: unknown
+    robots_rule_matched: null
+    robots_evaluated_at: null
+    access_decision_reason: inactive candidate; human approval required
+    terms_reference: https://info.arxiv.org/help/api/
+    license_notes: Verify article and metadata license before activation.
+    rate_limit:
+      requests_per_minute: 1
+      burst: 1
+      retry_after_seconds: 60
+      max_concurrency: 1
+    schedule: "approval_required"
+    last_success_at: null
+    cursor: null
+    trust_tier: tier_1
+    error_state: null
+    original_url: https://export.arxiv.org/api/query
+    metadata: {activation: human_approval_required}
+
+  - source_id: real_github_api
+    name: GitHub API Candidate
+    type: github_repository
+    base_url: https://api.github.com
+    connector_type: github_api
+    active: false
+    fixture: false
+    access_policy:
+      robots: not_applicable
+      terms: https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api
+      license: Repository-specific license review required
+      rate_limit: API token and operator approval required before activation
+      user_agent: scalping-briefing/0.1 (approval required)
+      allowlist: [https://api.github.com]
+    robots_allowed: unknown
+    robots_rule_matched: null
+    robots_evaluated_at: null
+    access_decision_reason: inactive candidate; human approval required
+    terms_reference: https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api
+    license_notes: Review repository license and API policy before activation.
+    rate_limit:
+      requests_per_minute: 60
+      burst: 2
+      retry_after_seconds: 60
+      max_concurrency: 1
+    schedule: "approval_required"
+    last_success_at: null
+    cursor: null
+    trust_tier: tier_1
+    error_state: null
+    original_url: https://api.github.com
+    metadata: {activation: human_approval_required}
+
+  - source_id: real_exchange_docs
+    name: Exchange Technical Docs Candidate
+    type: exchange_docs
+    base_url: https://developers.binance.com
+    connector_type: html
+    active: false
+    fixture: false
+    access_policy:
+      robots: required
+      terms: https://www.binance.com/en/terms
+      license: Publisher terms and redistribution license review required
+      rate_limit: Operator approval required before activation
+      user_agent: scalping-briefing/0.1 (approval required)
+      allowlist: [https://developers.binance.com]
+    robots_allowed: unknown
+    robots_rule_matched: null
+    robots_evaluated_at: null
+    access_decision_reason: inactive candidate; human approval required
+    terms_reference: https://www.binance.com/en/terms
+    license_notes: Do not activate until terms, robots, and citation limits are approved.
+    rate_limit:
+      requests_per_minute: 30
+      burst: 1
+      retry_after_seconds: 60
+      max_concurrency: 1
+    schedule: "approval_required"
+    last_success_at: null
+    cursor: null
+    trust_tier: tier_2
+    error_state: null
+    original_url: https://developers.binance.com/docs
+    metadata: {activation: human_approval_required}
+
+  - source_id: real_research_blog
+    name: Specialist Research Blog Candidate
+    type: research_blog
+    base_url: https://blog.quantinsti.com
+    connector_type: rss
+    active: false
+    fixture: false
+    access_policy:
+      robots: required
+      terms: https://blog.quantinsti.com/terms-of-use/
+      license: Author and publisher license review required
+      rate_limit: Operator approval required before activation
+      user_agent: scalping-briefing/0.1 (approval required)
+      allowlist: [https://blog.quantinsti.com]
+    robots_allowed: unknown
+    robots_rule_matched: null
+    robots_evaluated_at: null
+    access_decision_reason: inactive candidate; human approval required
+    terms_reference: https://blog.quantinsti.com/terms-of-use/
+    license_notes: Confirm quotation and RSS use policy before activation.
+    rate_limit:
+      requests_per_minute: 10
+      burst: 1
+      retry_after_seconds: 60
+      max_concurrency: 1
+    schedule: "approval_required"
+    last_success_at: null
+    cursor: null
+    trust_tier: tier_2
+    error_state: null
+    original_url: https://blog.quantinsti.com/feed/
+    metadata: {activation: human_approval_required}
+
+  - source_id: real_crossref_api
+    name: Crossref Metadata Candidate
+    type: paper_metadata
+    base_url: https://api.crossref.org
+    connector_type: paper_metadata
+    active: false
+    fixture: false
+    access_policy:
+      robots: not_applicable
+      terms: https://www.crossref.org/documentation/retrieve-metadata/rest-api/
+      license: Metadata and article-specific license review required
+      rate_limit: Operator approval required before activation
+      user_agent: scalping-briefing/0.1 (approval required)
+      allowlist: [https://api.crossref.org]
+    robots_allowed: unknown
+    robots_rule_matched: null
+    robots_evaluated_at: null
+    access_decision_reason: inactive candidate; human approval required
+    terms_reference: https://www.crossref.org/documentation/retrieve-metadata/rest-api/
+    license_notes: Metadata does not grant full-text redistribution rights.
+    rate_limit:
+      requests_per_minute: 50
+      burst: 1
+      retry_after_seconds: 60
+      max_concurrency: 1
+    schedule: "approval_required"
+    last_success_at: null
+    cursor: null
+    trust_tier: tier_1
+    error_state: null
+    original_url: https://api.crossref.org/works
+    metadata: {activation: human_approval_required}

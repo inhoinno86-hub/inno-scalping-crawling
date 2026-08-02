@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Fixture Scalping Research Blog</title>
+    <link>https://example.invalid/research</link>
+    <description>Offline RSS fixture.</description>
+    <item>
+      <title>Spread Reversion Notes</title>
+      <link>https://example.invalid/research/spread-reversion</link>
+      <guid isPermaLink="true">https://example.invalid/research/spread-reversion</guid>
+      <pubDate>Tue, 30 Jun 2026 01:00:00 GMT</pubDate>
+      <description>Short-horizon spread observations and reproducibility notes.</description>
+    </item>
+    <item>
+      <title>Queue Momentum Update</title>
+      <link>https://example.invalid/research/queue-momentum</link>
+      <guid isPermaLink="true">https://example.invalid/research/queue-momentum</guid>
+      <pubDate>Tue, 30 Jun 2026 02:00:00 GMT</pubDate>
+      <description>Updated holding horizon, queue imbalance thresholds, and data requirements.</description>
+    </item>
+    <item>
+      <title>Queue Momentum Update (duplicate record)</title>
+      <link>https://example.invalid/research/queue-momentum</link>
+      <guid isPermaLink="true">https://example.invalid/research/queue-momentum</guid>
+      <pubDate>Tue, 30 Jun 2026 02:00:00 GMT</pubDate>
+      <description>Same canonical URL intentionally repeated for deduplication tests.</description>
+    </item>
+    <item>
+      <title>Latency Budget Addendum</title>
+      <link>https://example.invalid/research/latency-budget</link>
+      <guid isPermaLink="true">https://example.invalid/research/latency-budget</guid>
+      <pubDate>Wed, 01 Jul 2026 01:00:00 GMT</pubDate>
+      <description>New fixture item covering latency budget observations.</description>
+    </item>
+  </channel>
+</rss>

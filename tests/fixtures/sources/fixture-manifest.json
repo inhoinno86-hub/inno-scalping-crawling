@@ -1,0 +1,23 @@
+{
+  "fixture_manifest_version": 1,
+  "captured_at": "2026-07-01T00:00:00Z",
+  "recorded_at": "2026-07-01T00:00:00Z",
+  "network_access": "none",
+  "sources": [
+    {"source_id": "fixture_rss_blog", "kind": "rss_2_0", "metadata": "fixture_rss_blog/metadata.json", "responses": ["fixture_rss_blog/response.xml", "fixture_rss_blog/response.v2.xml"]},
+    {"source_id": "fixture_atom_research", "kind": "atom", "metadata": "fixture_atom_research/metadata.json", "responses": ["fixture_atom_research/response.xml", "fixture_atom_research/headers.json", "fixture_atom_research/response.v2.xml", "fixture_atom_research/headers.v2.json"]},
+    {"source_id": "fixture_github_repo", "kind": "github_rest", "metadata": "fixture_github_repo/metadata.json", "responses": ["fixture_github_repo/releases.json", "fixture_github_repo/releases.v2.json", "fixture_github_repo/readme.json"]},
+    {"source_id": "fixture_exchange_docs", "kind": "html", "metadata": "fixture_exchange_docs/metadata.json", "responses": ["fixture_exchange_docs/response.html", "fixture_exchange_docs/robots.txt"]},
+    {"source_id": "fixture_paper_meta", "kind": "paper_metadata", "metadata": "fixture_paper_meta/metadata.json", "responses": ["fixture_paper_meta/response.json"]}
+  ],
+  "captures": [
+    {"path": "fixture_rss_blog/response.xml", "source_id": "fixture_rss_blog", "version": "v1", "captured_at": "2026-07-01T01:00:00Z", "original_url": "https://example.invalid/research/rss"},
+    {"path": "fixture_rss_blog/response.v2.xml", "source_id": "fixture_rss_blog", "version": "v2", "captured_at": "2026-07-02T01:00:00Z", "original_url": "https://example.invalid/research/rss"},
+    {"path": "fixture_atom_research/response.xml", "source_id": "fixture_atom_research", "version": "v1", "captured_at": "2026-07-01T01:05:00Z", "original_url": "https://example.invalid/research/atom"},
+    {"path": "fixture_atom_research/response.v2.xml", "source_id": "fixture_atom_research", "version": "v2", "captured_at": "2026-07-02T01:05:00Z", "original_url": "https://example.invalid/research/atom"},
+    {"path": "fixture_atom_research/headers.json", "source_id": "fixture_atom_research", "version": "v1", "captured_at": "2026-07-01T01:05:00Z", "original_url": "https://example.invalid/research/atom"},
+    {"path": "fixture_atom_research/headers.v2.json", "source_id": "fixture_atom_research", "version": "v2", "captured_at": "2026-07-02T01:05:00Z", "original_url": "https://example.invalid/research/atom"},
+    {"path": "fixture_github_repo/releases.json", "source_id": "fixture_github_repo", "version": "v1", "captured_at": "2026-07-01T01:10:00Z", "original_url": "https://api.github.com/repos/example/scalping-fixture"},
+    {"path": "fixture_github_repo/releases.v2.json", "source_id": "fixture_github_repo", "version": "v2", "captured_at": "2026-07-02T01:10:00Z", "original_url": "https://api.github.com/repos/example/scalping-fixture"}
+  ]
+}
