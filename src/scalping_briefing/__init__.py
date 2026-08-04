@@ -35,6 +35,7 @@ from .sources.registry import (
     response_status,
     source_value,
 )
+from .review.api import create_review_app
 
 __version__ = "0.1.0"
 
@@ -447,42 +448,6 @@ def _persist_source_cursor(session: Session, source: SourceRecord) -> None:
     if cursor is not None:
         record.cursor = _cursor_json(cursor)
     record.last_success_at = utc_now()
-
-
-def create_review_app(settings: Settings | None = None) -> Any:
-    """Create minimal local review API app; import web framework lazily."""
-
-    active_settings = settings or load_config()
-    configured_token = active_settings.REVIEW_API_TOKEN
-    if not isinstance(configured_token, str) or not configured_token.strip():
-        raise RuntimeError("review-api requires REVIEW_API_TOKEN")
-
-    try:
-        from fastapi import Depends, FastAPI, Header, HTTPException
-    except ImportError as exc:  # pragma: no cover - dependency installation issue
-        raise RuntimeError("review-api requires fastapi") from exc
-
-    app = FastAPI(title="scalping-briefing review API", version=__version__)
-
-    async def require_review_token(
-        authorization: str | None = Header(default=None),
-        x_review_token: str | None = Header(default=None),
-    ) -> None:
-        presented_token = x_review_token
-        if presented_token is None and authorization and authorization.startswith("Bearer "):
-            presented_token = authorization[7:]
-        if presented_token != configured_token:
-            raise HTTPException(status_code=401, detail="review token required")
-
-    @app.get("/health")
-    async def health() -> dict[str, str]:
-        return {"status": "ok", "binding": active_settings.REVIEW_API_BIND}
-
-    @app.get("/reviews", dependencies=[Depends(require_review_token)])
-    async def reviews() -> dict[str, list[Any]]:
-        return {"reviews": []}
-
-    return app
 
 
 def run_review_api() -> int:

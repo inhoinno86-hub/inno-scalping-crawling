@@ -548,14 +548,17 @@ def _record_success(
     excluded_fields: Sequence[str],
 ) -> None:
     _set_state(document_version, "validated")
-    metadata = _metadata(document_version)
-    metadata["validation"] = {
+    validation_metadata: dict[str, Any] = {
         "status": "validated",
         "candidate_id": candidate_id,
         "evidence_count": evidence_count,
         "publishable_fields": list(publishable_fields),
         "excluded_fields": list(excluded_fields),
     }
+    if not publishable_fields:
+        validation_metadata["reason"] = "no_publishable_fields"
+    metadata = _metadata(document_version)
+    metadata["validation"] = validation_metadata
     _store_metadata(document_version, metadata)
 
 
@@ -678,9 +681,9 @@ def validate_extracted_candidate(
             for field_name in CORE_FIELDS
             if field_name not in publishable_fields
         )
-        if not evidence_rows or not publishable_fields:
+        if not evidence_rows:
             raise EvidenceValidationError(
-                "candidate requires Evidence for at least one publishable core field"
+                "candidate requires at least one Evidence record"
             )
         _record_success(
             document_version,

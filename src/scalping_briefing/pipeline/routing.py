@@ -17,7 +17,17 @@ from scalping_briefing.config import load_config
 from scalping_briefing.pipeline import state_machine
 
 
-CORE_CONFLICT_FIELDS = ("entry_logic", "exit_logic", "required_data")
+# P15 applies to every core field.  Keep this tuple local so routing remains a
+# small policy boundary and does not create a dependency on validation result
+# implementation details.
+CORE_CONFLICT_FIELDS = (
+    "core_hypothesis",
+    "signal_inputs",
+    "entry_logic",
+    "exit_logic",
+    "required_data",
+    "risk_notes",
+)
 REVIEW_REASONS = (
     "borderline_score",
     "low_extraction_confidence",
