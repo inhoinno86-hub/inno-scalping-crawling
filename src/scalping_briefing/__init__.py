@@ -178,6 +178,23 @@ def run_briefing() -> int:
     return 0
 
 
+def run_briefing_cycle() -> int:
+    """Run the Phase 4b orchestration cycle and print its summary."""
+
+    settings = load_config()
+    engine = create_engine(settings.DATABASE_URL)
+    session = Session(engine)
+    try:
+        from .orchestration.cycle import run_cycle
+
+        summary = run_cycle(session, settings=settings)
+    finally:
+        session.close()
+        engine.dispose()
+    print(summary.to_json())
+    return summary.exit_code
+
+
 def _collection_target(source: SourceRecord) -> str:
     return str(source_value(source, "base_url", ""))
 
@@ -476,5 +493,6 @@ __all__ = [
     "load_config",
     "load_settings",
     "run_briefing",
+    "run_briefing_cycle",
     "run_review_api",
 ]
