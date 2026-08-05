@@ -9,14 +9,14 @@
       <link>https://example.invalid/research/spread-reversion</link>
       <guid isPermaLink="true">https://example.invalid/research/spread-reversion</guid>
       <pubDate>Tue, 30 Jun 2026 01:00:00 GMT</pubDate>
-      <description>Short-horizon spread observations and reproducibility notes.</description>
+      <description>Short-horizon spread observations and reproducibility notes. The hypothesis is that a widened quoted spread reverts within the next few seconds. The signals used are the quoted spread and the top-of-book depth. Entry is taken when the spread exceeds its recent median for two consecutive samples. The position is exited when the spread returns to that median or after a thirty second timeout. The data required is level 1 quotes at one second resolution. The risks noted are latency sensitivity and adverse selection during news.</description>
     </item>
     <item>
       <title>Queue Momentum Update</title>
       <link>https://example.invalid/research/queue-momentum</link>
       <guid isPermaLink="true">https://example.invalid/research/queue-momentum</guid>
       <pubDate>Tue, 30 Jun 2026 02:00:00 GMT</pubDate>
-      <description>Updated holding horizon, queue imbalance thresholds, and data requirements.</description>
+      <description>Updated holding horizon, queue imbalance thresholds, and data requirements. The hypothesis is that queue imbalance precedes short-horizon price movement. The signals used are queue imbalance and recent trade direction. Entry is taken when imbalance stays above the documented ratio for three samples. The position is exited on imbalance reversal or after a sixty second timeout. The data required is level 2 quotes and trade prints. The risks noted are queue position uncertainty and cancellation bursts.</description>
     </item>
     <item>
       <title>Queue Momentum Update (duplicate record)</title>

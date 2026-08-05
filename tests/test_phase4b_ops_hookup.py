@@ -171,6 +171,7 @@ def test_operational_stages_run_after_briefing_failure(
             "processed": 1,
             "succeeded": 1,
             "failed": 0,
+            "skipped": 0,
         }
     assert summary.report_path is not None
     assert summary.metrics == {

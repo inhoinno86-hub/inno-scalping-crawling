@@ -8,7 +8,9 @@
       "response": {
         "relevance_status": "relevant",
         "summary": "Recorded fixture response only.",
-        "field_status": {"summary": "explicit"}
+        "field_status": {
+          "summary": "explicit"
+        }
       }
     },
     "f1ec275a835f4409d8643a0d662c4a82c4667863d83e28c13a8b44a053e70560": {
@@ -27,13 +29,19 @@
         "summary": "Short-horizon queue momentum candidate from recorded fixture material.",
         "core_hypothesis": "Queue imbalance can precede short-horizon movement.",
         "core_hypothesis_status": "explicit",
-        "signal_inputs": ["queue imbalance", "order book"],
+        "signal_inputs": [
+          "queue imbalance",
+          "order book"
+        ],
         "signal_inputs_status": "explicit",
         "entry_logic": "Enter after the documented queue imbalance condition.",
         "entry_logic_status": "explicit",
         "exit_logic": "Exit on reversal or the documented holding timeout.",
         "exit_logic_status": "explicit",
-        "required_data": ["L2 quotes", "trades"],
+        "required_data": [
+          "L2 quotes",
+          "trades"
+        ],
         "required_data_status": "explicit",
         "risk_notes": "Latency and adverse selection require review.",
         "risk_notes_status": "explicit",
@@ -49,16 +57,48 @@
         "review_status": "needs_review",
         "source_confidence": 0.9,
         "extraction_confidence": 0.8,
-        "document_version_ids": ["fixture-document-version-1"],
+        "document_version_ids": [
+          "fixture-document-version-1"
+        ],
         "metadata": {
           "fixture_case": "normal",
           "evidence": [
-            {"field_name": "core_hypothesis", "quote": "Queue imbalance can precede short-horizon movement.", "section_or_locator": "Hypothesis", "document_version_id": "fixture-document-version-1"},
-            {"field_name": "signal_inputs", "quote": "queue imbalance and order book", "section_or_locator": "Signals", "document_version_id": "fixture-document-version-1"},
-            {"field_name": "entry_logic", "quote": "Enter after the documented queue imbalance condition.", "section_or_locator": "Entry", "document_version_id": "fixture-document-version-1"},
-            {"field_name": "exit_logic", "quote": "Exit on reversal or the documented holding timeout.", "section_or_locator": "Exit", "document_version_id": "fixture-document-version-1"},
-            {"field_name": "required_data", "quote": "L2 quotes and trades", "section_or_locator": "Data", "document_version_id": "fixture-document-version-1"},
-            {"field_name": "risk_notes", "quote": "Latency and adverse selection require review.", "section_or_locator": "Risks", "document_version_id": "fixture-document-version-1"}
+            {
+              "field_name": "core_hypothesis",
+              "quote": "Queue imbalance can precede short-horizon movement.",
+              "section_or_locator": "Hypothesis",
+              "document_version_id": "fixture-document-version-1"
+            },
+            {
+              "field_name": "signal_inputs",
+              "quote": "queue imbalance and order book",
+              "section_or_locator": "Signals",
+              "document_version_id": "fixture-document-version-1"
+            },
+            {
+              "field_name": "entry_logic",
+              "quote": "Enter after the documented queue imbalance condition.",
+              "section_or_locator": "Entry",
+              "document_version_id": "fixture-document-version-1"
+            },
+            {
+              "field_name": "exit_logic",
+              "quote": "Exit on reversal or the documented holding timeout.",
+              "section_or_locator": "Exit",
+              "document_version_id": "fixture-document-version-1"
+            },
+            {
+              "field_name": "required_data",
+              "quote": "L2 quotes and trades",
+              "section_or_locator": "Data",
+              "document_version_id": "fixture-document-version-1"
+            },
+            {
+              "field_name": "risk_notes",
+              "quote": "Latency and adverse selection require review.",
+              "section_or_locator": "Risks",
+              "document_version_id": "fixture-document-version-1"
+            }
           ]
         }
       }
@@ -118,8 +158,12 @@
         "review_status": "needs_review",
         "source_confidence": null,
         "extraction_confidence": 0.4,
-        "document_version_ids": ["fixture-document-version-unknown"],
-        "metadata": {"fixture_case": "unknown"}
+        "document_version_ids": [
+          "fixture-document-version-unknown"
+        ],
+        "metadata": {
+          "fixture_case": "unknown"
+        }
       }
     },
     "6bb9e497449083a3d4b456755d2fd450419c354dbe3115c31ad4182f20589e3f": {
@@ -138,13 +182,17 @@
         "summary": "Recorded material contains opposing entry conditions.",
         "core_hypothesis": "The source gives opposing hypotheses.",
         "core_hypothesis_status": "conflicting",
-        "signal_inputs": ["queue imbalance"],
+        "signal_inputs": [
+          "queue imbalance"
+        ],
         "signal_inputs_status": "explicit",
         "entry_logic": "The source reports opposing entry conditions.",
         "entry_logic_status": "conflicting",
         "exit_logic": null,
         "exit_logic_status": "unknown",
-        "required_data": ["order book"],
+        "required_data": [
+          "order book"
+        ],
         "required_data_status": "explicit",
         "risk_notes": null,
         "risk_notes_status": "unknown",
@@ -160,14 +208,38 @@
         "review_status": "needs_review",
         "source_confidence": 0.7,
         "extraction_confidence": 0.6,
-        "document_version_ids": ["fixture-document-version-conflicting"],
+        "document_version_ids": [
+          "fixture-document-version-conflicting"
+        ],
         "metadata": {
           "fixture_case": "conflicting",
           "evidence": [
-            {"field_name": "core_hypothesis", "quote": "The source gives opposing hypotheses.", "section_or_locator": "Discussion", "document_version_id": "fixture-document-version-conflicting", "status": "conflicting"},
-            {"field_name": "entry_logic", "quote": "The source reports opposing entry conditions.", "section_or_locator": "Rules", "document_version_id": "fixture-document-version-conflicting", "status": "conflicting"},
-            {"field_name": "signal_inputs", "quote": "queue imbalance", "section_or_locator": "Signals", "document_version_id": "fixture-document-version-conflicting"},
-            {"field_name": "required_data", "quote": "order book", "section_or_locator": "Data", "document_version_id": "fixture-document-version-conflicting"}
+            {
+              "field_name": "core_hypothesis",
+              "quote": "The source gives opposing hypotheses.",
+              "section_or_locator": "Discussion",
+              "document_version_id": "fixture-document-version-conflicting",
+              "status": "conflicting"
+            },
+            {
+              "field_name": "entry_logic",
+              "quote": "The source reports opposing entry conditions.",
+              "section_or_locator": "Rules",
+              "document_version_id": "fixture-document-version-conflicting",
+              "status": "conflicting"
+            },
+            {
+              "field_name": "signal_inputs",
+              "quote": "queue imbalance",
+              "section_or_locator": "Signals",
+              "document_version_id": "fixture-document-version-conflicting"
+            },
+            {
+              "field_name": "required_data",
+              "quote": "order book",
+              "section_or_locator": "Data",
+              "document_version_id": "fixture-document-version-conflicting"
+            }
           ]
         }
       }
@@ -185,7 +257,529 @@
       "response": {
         "relevance_status": "relevant",
         "reason": "Short-horizon queue and order-book signals are in scope.",
-        "signals": ["short-horizon", "queue", "order book"]
+        "signals": [
+          "short-horizon",
+          "queue",
+          "order book"
+        ]
+      }
+    },
+    "stable:phase2-extraction-v1:sha256:2f25706d25f0165ce6976f2bca597424f4b557c00c2c509f79be1f8e7f567e55": {
+      "recorded_at": "2026-08-05T00:00:00Z",
+      "input_document_version_id": "0d49fbf5-dd7b-41d5-ab72-1a1f15f36bfb",
+      "content_hash": "sha256:2f25706d25f0165ce6976f2bca597424f4b557c00c2c509f79be1f8e7f567e55",
+      "fixture_case": "offline-authored",
+      "model_name": "fixture",
+      "prompt_version": "phase2-extraction-v1",
+      "response": {
+        "candidate_id": "fixture-candidate-2f25706d25f0165c",
+        "canonical_name": "README.md",
+        "core_hypothesis": "The hypothesis is that short-horizon queue momentum persists for a few seconds.",
+        "core_hypothesis_status": "explicit",
+        "document_version_ids": [
+          "{{document_version_id}}"
+        ],
+        "entry_logic": "Entry is taken when queue momentum stays positive for two samples.",
+        "entry_logic_status": "explicit",
+        "exit_logic": "The position is exited on momentum reversal or after the documented timeout.",
+        "exit_logic_status": "explicit",
+        "extraction_confidence": 0.5,
+        "field_status": {
+          "core_hypothesis": "explicit",
+          "entry_logic": "explicit",
+          "exit_logic": "explicit",
+          "required_data": "explicit",
+          "risk_notes": "explicit",
+          "signal_inputs": "explicit"
+        },
+        "metadata": {
+          "evidence": [
+            {
+              "field_name": "core_hypothesis",
+              "quote": "The hypothesis is that short-horizon queue momentum persists for a few seconds.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "signal_inputs",
+              "quote": "The signals used are queue depth changes and trade direction.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "entry_logic",
+              "quote": "Entry is taken when queue momentum stays positive for two samples.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "exit_logic",
+              "quote": "The position is exited on momentum reversal or after the documented timeout.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "required_data",
+              "quote": "The data required is level 2 quotes.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "risk_notes",
+              "quote": "The risks noted are cancellation bursts and adverse selection.",
+              "section_or_locator": "Document body"
+            }
+          ],
+          "fixture_case": "offline-authored"
+        },
+        "relevance_status": "relevant",
+        "required_data": [
+          "The data required is level 2 quotes."
+        ],
+        "required_data_status": "explicit",
+        "review_status": "needs_review",
+        "risk_notes": "The risks noted are cancellation bursts and adverse selection.",
+        "risk_notes_status": "explicit",
+        "signal_inputs": [
+          "The signals used are queue depth changes and trade direction."
+        ],
+        "signal_inputs_status": "explicit",
+        "source_confidence": 0.5,
+        "summary": "Offline fixture candidate recorded from: README.md"
+      }
+    },
+    "stable:phase2-extraction-v1:sha256:504c6f4bfe5549c434a21099b51b91d30f0ccd75243497cf6e467f06e67e784f": {
+      "recorded_at": "2026-08-05T00:00:00Z",
+      "input_document_version_id": "3c6ba39b-96a7-4173-bfb9-83faaf5814d2",
+      "content_hash": "sha256:504c6f4bfe5549c434a21099b51b91d30f0ccd75243497cf6e467f06e67e784f",
+      "fixture_case": "offline-authored",
+      "model_name": "fixture",
+      "prompt_version": "phase2-extraction-v1",
+      "response": {
+        "candidate_id": "fixture-candidate-504c6f4bfe5549c4",
+        "canonical_name": "Microstructure Mean Reversion",
+        "core_hypothesis": "The hypothesis is that microstructure mean reversion follows an extreme quote move.",
+        "core_hypothesis_status": "explicit",
+        "document_version_ids": [
+          "{{document_version_id}}"
+        ],
+        "entry_logic": "Entry is taken when the deviation exceeds the documented threshold.",
+        "entry_logic_status": "explicit",
+        "exit_logic": "The position is exited when the mid-price returns to its rolling mean.",
+        "exit_logic_status": "explicit",
+        "extraction_confidence": 0.5,
+        "field_status": {
+          "core_hypothesis": "explicit",
+          "entry_logic": "explicit",
+          "exit_logic": "explicit",
+          "required_data": "explicit",
+          "risk_notes": "explicit",
+          "signal_inputs": "explicit"
+        },
+        "metadata": {
+          "evidence": [
+            {
+              "field_name": "core_hypothesis",
+              "quote": "The hypothesis is that microstructure mean reversion follows an extreme quote move.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "signal_inputs",
+              "quote": "The signals used are the mid-price deviation and the trade sign run length.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "entry_logic",
+              "quote": "Entry is taken when the deviation exceeds the documented threshold.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "exit_logic",
+              "quote": "The position is exited when the mid-price returns to its rolling mean.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "required_data",
+              "quote": "The data required is level 1 quotes and trade prints.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "risk_notes",
+              "quote": "The risks noted are regime change and thin liquidity at the open.",
+              "section_or_locator": "Document body"
+            }
+          ],
+          "fixture_case": "offline-authored"
+        },
+        "relevance_status": "relevant",
+        "required_data": [
+          "The data required is level 1 quotes and trade prints."
+        ],
+        "required_data_status": "explicit",
+        "review_status": "needs_review",
+        "risk_notes": "The risks noted are regime change and thin liquidity at the open.",
+        "risk_notes_status": "explicit",
+        "signal_inputs": [
+          "The signals used are the mid-price deviation and the trade sign run length."
+        ],
+        "signal_inputs_status": "explicit",
+        "source_confidence": 0.5,
+        "summary": "Offline fixture candidate recorded from: Microstructure Mean Reversion"
+      }
+    },
+    "stable:phase2-extraction-v1:sha256:54e8a0a3690b7560a305c1dff536ac789c245a047b0a70c51a480a58a97a66d1": {
+      "recorded_at": "2026-08-05T00:00:00Z",
+      "input_document_version_id": "c30b0d9c-8bf3-4fb2-bc78-e2e736cac4a9",
+      "content_hash": "sha256:54e8a0a3690b7560a305c1dff536ac789c245a047b0a70c51a480a58a97a66d1",
+      "fixture_case": "offline-authored",
+      "model_name": "fixture",
+      "prompt_version": "phase2-extraction-v1",
+      "response": {
+        "candidate_id": "fixture-candidate-54e8a0a3690b7560",
+        "canonical_name": "Spread Reversion Notes",
+        "core_hypothesis": "The hypothesis is that a widened quoted spread reverts within the next few seconds.",
+        "core_hypothesis_status": "explicit",
+        "document_version_ids": [
+          "{{document_version_id}}"
+        ],
+        "entry_logic": "Entry is taken when the spread exceeds its recent median for two consecutive samples.",
+        "entry_logic_status": "explicit",
+        "exit_logic": "The position is exited when the spread returns to that median or after a thirty second timeout.",
+        "exit_logic_status": "explicit",
+        "extraction_confidence": 0.5,
+        "field_status": {
+          "core_hypothesis": "explicit",
+          "entry_logic": "explicit",
+          "exit_logic": "explicit",
+          "required_data": "explicit",
+          "risk_notes": "explicit",
+          "signal_inputs": "explicit"
+        },
+        "metadata": {
+          "evidence": [
+            {
+              "field_name": "core_hypothesis",
+              "quote": "The hypothesis is that a widened quoted spread reverts within the next few seconds.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "signal_inputs",
+              "quote": "The signals used are the quoted spread and the top-of-book depth.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "entry_logic",
+              "quote": "Entry is taken when the spread exceeds its recent median for two consecutive samples.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "exit_logic",
+              "quote": "The position is exited when the spread returns to that median or after a thirty second timeout.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "required_data",
+              "quote": "The data required is level 1 quotes at one second resolution.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "risk_notes",
+              "quote": "The risks noted are latency sensitivity and adverse selection during news.",
+              "section_or_locator": "Document body"
+            }
+          ],
+          "fixture_case": "offline-authored"
+        },
+        "relevance_status": "relevant",
+        "required_data": [
+          "The data required is level 1 quotes at one second resolution."
+        ],
+        "required_data_status": "explicit",
+        "review_status": "needs_review",
+        "risk_notes": "The risks noted are latency sensitivity and adverse selection during news.",
+        "risk_notes_status": "explicit",
+        "signal_inputs": [
+          "The signals used are the quoted spread and the top-of-book depth."
+        ],
+        "signal_inputs_status": "explicit",
+        "source_confidence": 0.5,
+        "summary": "Offline fixture candidate recorded from: Spread Reversion Notes"
+      }
+    },
+    "stable:phase2-extraction-v1:sha256:698108fa37a74d6a568eb12de01f6c0b564a41fa8c0f45554d568f145e79b670": {
+      "recorded_at": "2026-08-05T00:00:00Z",
+      "input_document_version_id": "235d0d71-9fbe-4e4a-9963-39dcd4dc4d21",
+      "content_hash": "sha256:698108fa37a74d6a568eb12de01f6c0b564a41fa8c0f45554d568f145e79b670",
+      "fixture_case": "offline-authored",
+      "model_name": "fixture",
+      "prompt_version": "phase2-extraction-v1",
+      "response": {
+        "candidate_id": "fixture-candidate-698108fa37a74d6a",
+        "canonical_name": "Order Flow Imbalance Study",
+        "core_hypothesis": "The hypothesis is that order flow imbalance leads short-horizon returns.",
+        "core_hypothesis_status": "explicit",
+        "document_version_ids": [
+          "{{document_version_id}}"
+        ],
+        "entry_logic": "Entry is taken when imbalance stays positive across two observation windows.",
+        "entry_logic_status": "explicit",
+        "exit_logic": "The position is exited on imbalance decay or at the end of the observation window.",
+        "exit_logic_status": "explicit",
+        "extraction_confidence": 0.5,
+        "field_status": {
+          "core_hypothesis": "explicit",
+          "entry_logic": "explicit",
+          "exit_logic": "explicit",
+          "required_data": "explicit",
+          "risk_notes": "explicit",
+          "signal_inputs": "explicit"
+        },
+        "metadata": {
+          "evidence": [
+            {
+              "field_name": "core_hypothesis",
+              "quote": "The hypothesis is that order flow imbalance leads short-horizon returns.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "signal_inputs",
+              "quote": "The signals used are order flow imbalance and cancel-to-trade ratio.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "entry_logic",
+              "quote": "Entry is taken when imbalance stays positive across two observation windows.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "exit_logic",
+              "quote": "The position is exited on imbalance decay or at the end of the observation window.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "required_data",
+              "quote": "The data required is level 2 order book snapshots.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "risk_notes",
+              "quote": "The risks noted are queue position uncertainty and venue latency.",
+              "section_or_locator": "Document body"
+            }
+          ],
+          "fixture_case": "offline-authored"
+        },
+        "relevance_status": "relevant",
+        "required_data": [
+          "The data required is level 2 order book snapshots."
+        ],
+        "required_data_status": "explicit",
+        "review_status": "needs_review",
+        "risk_notes": "The risks noted are queue position uncertainty and venue latency.",
+        "risk_notes_status": "explicit",
+        "signal_inputs": [
+          "The signals used are order flow imbalance and cancel-to-trade ratio."
+        ],
+        "signal_inputs_status": "explicit",
+        "source_confidence": 0.5,
+        "summary": "Offline fixture candidate recorded from: Order Flow Imbalance Study"
+      }
+    },
+    "stable:phase2-extraction-v1:sha256:932b78495ced6da287a50ea27935392fe93e4ca1a579d66d986ef95f0f27d249": {
+      "recorded_at": "2026-08-05T00:00:00Z",
+      "input_document_version_id": "c274a3e4-3fc5-45c8-ba12-1ae1e13cc1ec",
+      "content_hash": "sha256:932b78495ced6da287a50ea27935392fe93e4ca1a579d66d986ef95f0f27d249",
+      "fixture_case": "offline-authored",
+      "model_name": "fixture",
+      "prompt_version": "phase2-extraction-v1",
+      "response": {
+        "candidate_id": "fixture-candidate-932b78495ced6da2",
+        "canonical_name": "A Fixture Study of Short-Horizon Order Flow",
+        "core_hypothesis": "The hypothesis is that short-horizon order flow carries reproducible information.",
+        "core_hypothesis_status": "explicit",
+        "document_version_ids": [
+          "{{document_version_id}}"
+        ],
+        "entry_logic": "Entry is taken when signed order flow exceeds the reported threshold.",
+        "entry_logic_status": "explicit",
+        "exit_logic": "The position is exited after the reported holding horizon.",
+        "exit_logic_status": "explicit",
+        "extraction_confidence": 0.5,
+        "field_status": {
+          "core_hypothesis": "explicit",
+          "entry_logic": "explicit",
+          "exit_logic": "explicit",
+          "required_data": "explicit",
+          "risk_notes": "explicit",
+          "signal_inputs": "explicit"
+        },
+        "metadata": {
+          "evidence": [
+            {
+              "field_name": "core_hypothesis",
+              "quote": "The hypothesis is that short-horizon order flow carries reproducible information.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "signal_inputs",
+              "quote": "The signals used are signed order flow and depth at the touch.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "entry_logic",
+              "quote": "Entry is taken when signed order flow exceeds the reported threshold.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "exit_logic",
+              "quote": "The position is exited after the reported holding horizon.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "required_data",
+              "quote": "The data required is tick level trade and quote data.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "risk_notes",
+              "quote": "The risks noted are dataset licensing limits and survivorship effects.",
+              "section_or_locator": "Document body"
+            }
+          ],
+          "fixture_case": "offline-authored"
+        },
+        "relevance_status": "relevant",
+        "required_data": [
+          "The data required is tick level trade and quote data."
+        ],
+        "required_data_status": "explicit",
+        "review_status": "needs_review",
+        "risk_notes": "The risks noted are dataset licensing limits and survivorship effects.",
+        "risk_notes_status": "explicit",
+        "signal_inputs": [
+          "The signals used are signed order flow and depth at the touch."
+        ],
+        "signal_inputs_status": "explicit",
+        "source_confidence": 0.5,
+        "summary": "Offline fixture candidate recorded from: A Fixture Study of Short-Horizon Order Flow"
+      }
+    },
+    "stable:phase2-extraction-v1:sha256:a17a7c57c4082db6b75f5636460331705a3fcbd82cff0216978725d154d4ce72": {
+      "recorded_at": "2026-08-05T00:00:00Z",
+      "input_document_version_id": "2a4617b9-42e5-45b5-976b-ff985e9563b5",
+      "content_hash": "sha256:a17a7c57c4082db6b75f5636460331705a3fcbd82cff0216978725d154d4ce72",
+      "fixture_case": "offline-authored",
+      "model_name": "fixture",
+      "prompt_version": "phase2-extraction-v1",
+      "response": {
+        "candidate_id": "fixture-candidate-a17a7c57c4082db6",
+        "canonical_name": "Queue Momentum Update",
+        "core_hypothesis": "The hypothesis is that queue imbalance precedes short-horizon price movement.",
+        "core_hypothesis_status": "explicit",
+        "document_version_ids": [
+          "{{document_version_id}}"
+        ],
+        "entry_logic": "Entry is taken when imbalance stays above the documented ratio for three samples.",
+        "entry_logic_status": "explicit",
+        "exit_logic": "The position is exited on imbalance reversal or after a sixty second timeout.",
+        "exit_logic_status": "explicit",
+        "extraction_confidence": 0.5,
+        "field_status": {
+          "core_hypothesis": "explicit",
+          "entry_logic": "explicit",
+          "exit_logic": "explicit",
+          "required_data": "explicit",
+          "risk_notes": "explicit",
+          "signal_inputs": "explicit"
+        },
+        "metadata": {
+          "evidence": [
+            {
+              "field_name": "core_hypothesis",
+              "quote": "The hypothesis is that queue imbalance precedes short-horizon price movement.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "signal_inputs",
+              "quote": "The signals used are queue imbalance and recent trade direction.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "entry_logic",
+              "quote": "Entry is taken when imbalance stays above the documented ratio for three samples.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "exit_logic",
+              "quote": "The position is exited on imbalance reversal or after a sixty second timeout.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "required_data",
+              "quote": "The data required is level 2 quotes and trade prints.",
+              "section_or_locator": "Document body"
+            },
+            {
+              "field_name": "risk_notes",
+              "quote": "The risks noted are queue position uncertainty and cancellation bursts.",
+              "section_or_locator": "Document body"
+            }
+          ],
+          "fixture_case": "offline-authored"
+        },
+        "relevance_status": "relevant",
+        "required_data": [
+          "The data required is level 2 quotes and trade prints."
+        ],
+        "required_data_status": "explicit",
+        "review_status": "needs_review",
+        "risk_notes": "The risks noted are queue position uncertainty and cancellation bursts.",
+        "risk_notes_status": "explicit",
+        "signal_inputs": [
+          "The signals used are queue imbalance and recent trade direction."
+        ],
+        "signal_inputs_status": "explicit",
+        "source_confidence": 0.5,
+        "summary": "Offline fixture candidate recorded from: Queue Momentum Update"
+      }
+    },
+    "stable:phase2-extraction-v1:sha256:bc9a8a95a9b13c7f09b87de418c4c075aa42182540da2d349554835436edd9ce": {
+      "recorded_at": "2026-08-05T00:00:00Z",
+      "input_document_version_id": "343b189b-ee04-49ee-a8e6-b7cf50a1f705",
+      "content_hash": "sha256:bc9a8a95a9b13c7f09b87de418c4c075aa42182540da2d349554835436edd9ce",
+      "fixture_case": "offline-authored",
+      "model_name": "fixture",
+      "prompt_version": "phase2-extraction-v1",
+      "response": {
+        "candidate_id": "fixture-candidate-bc9a8a95a9b13c7f",
+        "canonical_name": "Queue momentum update",
+        "core_hypothesis": null,
+        "core_hypothesis_status": "unknown",
+        "document_version_ids": [
+          "{{document_version_id}}"
+        ],
+        "entry_logic": null,
+        "entry_logic_status": "unknown",
+        "exit_logic": null,
+        "exit_logic_status": "unknown",
+        "extraction_confidence": 0.5,
+        "field_status": {
+          "core_hypothesis": "unknown",
+          "entry_logic": "unknown",
+          "exit_logic": "unknown",
+          "required_data": "unknown",
+          "risk_notes": "unknown",
+          "signal_inputs": "unknown"
+        },
+        "metadata": {
+          "evidence": [],
+          "fixture_case": "offline-authored"
+        },
+        "relevance_status": "relevant",
+        "required_data": null,
+        "required_data_status": "unknown",
+        "review_status": "needs_review",
+        "risk_notes": null,
+        "risk_notes_status": "unknown",
+        "signal_inputs": null,
+        "signal_inputs_status": "unknown",
+        "source_confidence": 0.5,
+        "summary": "Offline fixture candidate recorded from: Queue momentum update"
       }
     }
   }

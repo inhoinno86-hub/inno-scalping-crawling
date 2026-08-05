@@ -15,6 +15,6 @@
     <title>Microstructure Mean Reversion</title>
     <link href="https://example.invalid/research/microstructure-mean-reversion" />
     <updated>2026-06-29T04:00:00Z</updated>
-    <summary>Short-horizon research metadata.</summary>
+    <summary>Short-horizon research metadata. The hypothesis is that microstructure mean reversion follows an extreme quote move. The signals used are the mid-price deviation and the trade sign run length. Entry is taken when the deviation exceeds the documented threshold. The position is exited when the mid-price returns to its rolling mean. The data required is level 1 quotes and trade prints. The risks noted are regime change and thin liquidity at the open.</summary>
   </entry>
 </feed>

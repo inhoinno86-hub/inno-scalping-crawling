@@ -127,7 +127,7 @@ window IDs, or timestamps can change the raw JSON bytes.
 | `scheduled_for` | ISO timestamp of the scheduled occurrence. |
 | `trigger_type` | Trigger classification, normally `scheduled`. |
 | `briefing_id` | Deterministic briefing identity for the trigger pair. |
-| `stages` | All 14 stage names, each with `processed`, `succeeded`, and `failed` counts. |
+| `stages` | All 14 stage names, each with `processed`, `succeeded`, `failed`, and `skipped` counts. `skipped` counts inputs the stage was never asked to handle because an earlier run already carried them past it; a skip is not a failure and writes no alert. |
 | `briefing_generated` | Whether `build_briefing` returned a briefing. |
 | `delivery_invoked` | Whether the delivery service was called. |
 | `delivery_status` | Delivery result status, or `null` when no result exists. |
@@ -184,75 +184,93 @@ briefing satisfies the gate; the cycle never auto-approves candidates or
 briefings under `P15`. An explicit approval or internal-draft marker is an
 operator/test precondition, not something the cycle creates.
 
-`PLAN_v3` §1.2 measured `make run-briefing-cycle` on 2026-08-05 in offline
-fixture mode. The two captured artifacts are documented separately below; the
-stage counts are not interchangeable. A previously recorded shorthand said
-`processed 7 / succeeded 7` and `processed 6 / **failed 6**`; those values are
-not the clean-state artifact's complete stage counts, so the tables below are
-the authoritative transcription.
+`make run-briefing-cycle` was re-measured offline on 2026-08-05, after the
+fixture recordings were rebuilt and the classify stage learned to skip
+already-processed versions. Two captured artifacts document the two cases; the
+stage counts are not interchangeable.
 
 ### Clean-state first run
 
 Captured in
 `.loop-engine/runs/02ecc401-5010-45a5-801f-f3c0317b2849/artifacts/run-briefing-cycle.clean-state.txt`.
-The summary uses `scheduled_for: "2026-08-07T08:00:00+09:00"`,
-`trigger_type: "scheduled"`, and
-`briefing_id: "briefing-ca09f3cd0240ffb3262ceb39e1bf72a94afb877a91ea8a747104a0544a11f639"`.
 
 | Stage | Captured result |
 | --- | --- |
 | collect | processed 1 / succeeded 1 / failed 0 |
-| classify | processed 8 / succeeded 7 / **failed 1** — `classification requires deduplicated state, got 'access_denied'` |
-| extract | processed 6 / succeeded 0 / **failed 6** — no matching prompt-hash entries in `llm/fixtures/response-map.json` |
-| validate · evidence · score · novelty · route | each processed 0 / succeeded 0 / failed 0 — no candidate arrived from upstream |
+| classify | processed 7 / succeeded 7 / failed 0 / **skipped 1** — the skipped version is `access_denied`, a state the classifier cannot accept |
+| extract | processed 7 / succeeded 7 / failed 0 — resolved through the content-addressed fixture recordings |
+| validate | processed 7 / succeeded 7 / failed 0 |
+| evidence · score · novelty · route | each processed 6 / succeeded 6 / failed 0 |
 | briefing | processed 1 / succeeded 1 / failed 0 (`pending_approval`) |
 | gate | processed 1 / succeeded 0 / **failed 1** — `briefing must be approved or explicitly marked as an internal draft` |
 | delivery | processed 0 / succeeded 0 / failed 0 — skipped after the gate stop |
 | metrics · report · alerting | each processed 1 / succeeded 1 / failed 0 |
 
-There are eight bounded failures in this artifact: one `classify`, six
-`extract`, and one `gate`. The summary is `status: "partial_success"` with exit
-code `1`, `briefing_generated: true`, and `delivery_invoked: false`. Metrics
-are `M5: meets_target`; `M1`, `M2`, `M3`, `M4`, and `M6` are
-`insufficient_data`. M5 has a measurable zero-duplicate sample, while the
-other five metrics have no qualifying observations in this one fixture window;
-under `P4`, a zero sample remains `insufficient_data` rather than becoming a
-passing or breached result. The report is archived below
-`storage/ops-reports/`.
-
-The six clean-state extract failures are fixture-data gaps: the required prompt
-hashes have no entries in `llm/fixtures/response-map.json`. Reporting those
-items as failures, instead of disguising missing responses as success, keeps
-the incomplete evidence visible in the cycle summary.
+The single bounded failure is the gate stop. The summary is
+`status: "partial_success"` with exit code `1`, `briefing_generated: true`, and
+`delivery_invoked: false`. Metrics are `M3: meets_target` and
+`M5: meets_target`; `M1`, `M2`, `M4`, and `M6` are `insufficient_data`, because
+one fixture window holds no qualifying observation for them. Under `P4` a
+missing sample stays `insufficient_data` rather than becoming a passing or
+breached result. The report is archived below `storage/ops-reports/`.
 
 ### Already-processed-database rerun
 
 Captured in
-`.loop-engine/runs/02ecc401-5010-45a5-801f-f3c0317b2849/artifacts/run-briefing-cycle.attempt-3.txt`.
-It uses the same scheduled occurrence and therefore the same
-`briefing_id`, but it runs against a database containing already-processed
-versions.
+`.loop-engine/runs/02ecc401-5010-45a5-801f-f3c0317b2849/artifacts/run-briefing-cycle.repeat-run.txt`.
+It uses the same scheduled occurrence, and therefore the same `briefing_id`,
+against the database the first run left behind.
 
 | Stage | Captured result |
 | --- | --- |
 | collect | processed 1 / succeeded 1 / failed 0 |
-| classify | processed 7 / succeeded 0 / **failed 7** — `classification requires deduplicated state, got 'failed'` or `classification requires deduplicated state, got 'background_only'` |
-| extract · validate · evidence · score · novelty · route | each processed 0 / succeeded 0 / failed 0 — classification produced no downstream items |
+| classify | processed 0 / succeeded 0 / failed 0 / **skipped 8** — every collected version is already past the states the classifier accepts |
+| extract · validate · evidence · score · novelty · route | each processed 0 — no document reached them |
 | briefing | processed 1 / succeeded 1 / failed 0 (`pending_approval`) |
-| gate | processed 1 / succeeded 0 / **failed 1** — `briefing must be approved or explicitly marked as an internal draft` |
-| delivery | processed 0 / succeeded 0 / failed 0 — skipped after the gate stop |
+| gate | processed 1 / succeeded 0 / **failed 1** — the same approval stop as the first run |
+| delivery | processed 0 / succeeded 0 / failed 0 |
 | metrics · report · alerting | each processed 1 / succeeded 1 / failed 0 |
 
-This artifact has eight bounded failures: seven `classify` failures caused by
-the existing processing states and one `gate` failure. Its summary is also
-`status: "partial_success"` with exit code `1`, `briefing_generated: true`,
-`delivery_invoked: false`, `M5: meets_target`, and
-`M1`/`M2`/`M3`/`M4`/`M6: insufficient_data`.
+The rerun keeps the same single gate failure, the same `partial_success` status
+and exit code `1`, and the same metric verdicts. It writes no per-document
+alert artifact, because a document the pipeline already finished is a skip, not
+a failure: collection returns every ingested version, including rows an earlier
+run carried to a terminal state, and re-classifying those would be an invalid
+transition. The skip count is the honest record of work that was not repeated.
 
-The rerun's `classification requires deduplicated state, got ...` reason is a
-classification state-machine failure, not a briefing or delivery idempotency
-failure. The same `briefing_id` is reused and the gate still stops delivery, so
-the briefing/delivery idempotency boundary remains separate from the upstream
-classification state. Reusing a briefing identity does not make `failed` or
-`background_only` document versions eligible for the `deduplicated` →
-classification transition.
+Skipping is separate from the briefing and delivery idempotency boundary. The
+same `(scheduled_for, trigger_type)` still yields one briefing and at most one
+delivery, and reusing a briefing identity never makes a `failed`,
+`background_only`, or `access_denied` document version eligible for
+classification again.
+
+### Fixture recordings survive a rebuilt database
+
+Every prompt embeds the row's `document_version_id`, which is a fresh UUID for
+each ingestion, so a recording keyed only by prompt hash stops matching as soon
+as the database is rebuilt. `llm/fixture.py` therefore resolves a prompt in two
+steps: the exact prompt hash first, then the content-addressed key
+`stable:{prompt_version}:{content_hash}` produced by `stable_prompt_key`. An
+exact hit replays byte for byte; a content-addressed hit substitutes the runtime
+`document_version_id` wherever the recording carries the
+`{{document_version_id}}` placeholder, which downstream contracts require for
+candidate `document_version_ids` and evidence rows. A prompt that matches
+neither key still fails hard, so an unrecorded prompt can never turn into a
+silent live call.
+
+Recordings are rebuilt offline with
+`scripts/build_offline_extraction_fixtures.py`, which captures the prompts one
+cycle actually issues and writes records for `scripts/record_llm_fixtures.py`:
+
+```
+python scripts/build_offline_extraction_fixtures.py --out records.json
+python scripts/record_llm_fixtures.py --input records.json \
+    --mapping src/scalping_briefing/llm/fixtures/response-map.json
+```
+
+Each recorded field is filled only from a sentence the fixture document actually
+contains, so every claim carries a quote that is a real substring of its source;
+a field whose sentence is absent stays `unknown` under `P4`.
+`tests/test_phase4b_offline_fixture_cycle.py` pins both halves of this: one
+offline run must reach routing with real candidates, and a repeated run must
+skip instead of re-reporting finished documents.

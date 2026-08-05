@@ -23,12 +23,12 @@ def _versions() -> list[dict[str, object]]:
     return [
         {
             "document_version_id": "dv-1",
-            "processing_status": "extracted",
+            "processing_status": "deduplicated",
             "normalized_text": "Queue imbalance precedes entry.",
         },
         {
             "document_version_id": "dv-2",
-            "processing_status": "extracted",
+            "processing_status": "deduplicated",
             "normalized_text": "Queue imbalance precedes entry.",
         },
     ]
@@ -148,7 +148,7 @@ def test_candidate_stages_run_in_order_for_each_document(monkeypatch, tmp_path) 
     assert [stage for _identifier, stage in calls] == list(expected_stages) * 2
     assert len(routed) == 2
     assert summary.failures == []
-    assert all(summary.stages[name].to_payload() == {"processed": 2, "succeeded": 2, "failed": 0} for name in expected_stages)
+    assert all(summary.stages[name].to_payload() == {"processed": 2, "succeeded": 2, "failed": 0, "skipped": 0} for name in expected_stages)
     assert all(result.candidate["review_status"] == "needs_review" for result in routed)
     assert all(result.candidate["review_status"] != "approved" for result in routed)
 
@@ -173,11 +173,13 @@ def test_extraction_failure_is_isolated_and_skipped_stages_stay_zero(
         "processed": 2,
         "succeeded": 1,
         "failed": 1,
+        "skipped": 0,
     }
     assert summary.stages["validate"].to_payload() == {
         "processed": 1,
         "succeeded": 1,
         "failed": 0,
+        "skipped": 0,
     }
     assert summary.stages["route"].processed == 1
     assert len(summary.failures) == 1
@@ -188,6 +190,7 @@ def test_extraction_failure_is_isolated_and_skipped_stages_stay_zero(
         "processed": 0,
         "succeeded": 0,
         "failed": 0,
+        "skipped": 0,
     }
     assert routed[0].candidate["review_status"] != "approved"
 
@@ -219,6 +222,7 @@ def test_irrelevant_classification_does_not_fabricate_downstream_success(
             "processed": 0,
             "succeeded": 0,
             "failed": 0,
+            "skipped": 0,
         }
 
 
@@ -247,6 +251,7 @@ def test_validated_extraction_uses_payload_without_revalidating(monkeypatch, tmp
         "processed": 1,
         "succeeded": 1,
         "failed": 0,
+        "skipped": 0,
     }
     assert summary.failures == []
     assert routed[0].candidate["review_status"] != "approved"
@@ -273,6 +278,7 @@ def test_unexpected_post_extraction_state_is_a_validate_failure(
         "processed": 1,
         "succeeded": 0,
         "failed": 1,
+        "skipped": 0,
     }
     assert summary.failures[0].stage == "validate"
     assert "needs_review" in summary.failures[0].reason
@@ -441,11 +447,13 @@ def test_real_candidate_stages_use_in_memory_sqlite_and_never_approve(
             "processed": 1,
             "succeeded": 1,
             "failed": 0,
+            "skipped": 0,
         }
         assert summary.stages["route"].to_payload() == {
             "processed": 1,
             "succeeded": 1,
             "failed": 0,
+            "skipped": 0,
         }
         assert summary.failures == []
         assert len(routed) == 1
@@ -454,3 +462,81 @@ def test_real_candidate_stages_use_in_memory_sqlite_and_never_approve(
     finally:
         session.close()
         engine.dispose()
+
+
+def test_already_processed_versions_are_skipped_without_failure_or_alert(
+    monkeypatch, tmp_path
+) -> None:
+    calls: list[tuple[str, str]] = []
+    _wire_fakes(monkeypatch, calls)
+    versions = _versions()
+    versions[0]["processing_status"] = "background_only"
+    summary = CycleSummary()
+
+    routed = run_candidate_stages(
+        None,
+        versions,
+        settings=SETTINGS,
+        summary=summary,
+        alerts_dir=tmp_path,
+        now=None,
+    )
+
+    assert {identifier for identifier, _stage in calls} == {"dv-2"}
+    assert len(routed) == 1
+    assert summary.failures == []
+    assert summary.status == "success"
+    assert summary.stages["classify"].to_payload() == {
+        "processed": 1,
+        "succeeded": 1,
+        "failed": 0,
+        "skipped": 1,
+    }
+    assert list(tmp_path.glob("*.json")) == []
+
+
+def test_states_the_classifier_cannot_accept_are_all_skipped(monkeypatch, tmp_path) -> None:
+    terminal_states = (
+        "failed",
+        "irrelevant",
+        "background_only",
+        "access_denied",
+        "duplicate",
+        "extracted",
+        "validated",
+        "needs_review",
+        "approved",
+        "rejected",
+        "archived",
+    )
+    calls: list[tuple[str, str]] = []
+    _wire_fakes(monkeypatch, calls)
+    versions = [
+        {
+            "document_version_id": f"dv-{index}",
+            "processing_status": state,
+            "normalized_text": "Queue imbalance precedes entry.",
+        }
+        for index, state in enumerate(terminal_states)
+    ]
+    summary = CycleSummary()
+
+    routed = run_candidate_stages(
+        None,
+        versions,
+        settings=SETTINGS,
+        summary=summary,
+        alerts_dir=tmp_path,
+        now=None,
+    )
+
+    assert calls == []
+    assert routed == []
+    assert summary.failures == []
+    assert summary.status == "success"
+    assert summary.stages["classify"].to_payload() == {
+        "processed": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "skipped": len(terminal_states),
+    }

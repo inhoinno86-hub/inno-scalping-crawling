@@ -1,12 +1,31 @@
 {
   "message": {
     "DOI": "10.5555/fixture.scalping.2026",
-    "title": ["A Fixture Study of Short-Horizon Order Flow"],
-    "author": [{"given": "Fixture", "family": "Researcher"}],
-    "published": {"date-parts": [[2026, 6, 28]]},
+    "title": [
+      "A Fixture Study of Short-Horizon Order Flow"
+    ],
+    "author": [
+      {
+        "given": "Fixture",
+        "family": "Researcher"
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2026,
+          6,
+          28
+        ]
+      ]
+    },
     "URL": "https://doi.org/10.5555/fixture.scalping.2026",
-    "license": [{"URL": "https://creativecommons.org/licenses/by/4.0/"}],
-    "abstract": "Metadata-only fixture. The abstract describes a reproducible short-horizon observation."
+    "license": [
+      {
+        "URL": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    ],
+    "abstract": "Metadata-only fixture. The abstract describes a reproducible short-horizon observation. The hypothesis is that short-horizon order flow carries reproducible information. The signals used are signed order flow and depth at the touch. Entry is taken when signed order flow exceeds the reported threshold. The position is exited after the reported holding horizon. The data required is tick level trade and quote data. The risks noted are dataset licensing limits and survivorship effects."
   },
   "captured_at": "2026-07-01T01:20:00Z",
   "original_url": "https://doi.org/10.5555/fixture.scalping.2026"

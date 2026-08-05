@@ -235,7 +235,7 @@ def test_phase4b_dod1_cycle_runs_collection_through_dry_run_delivery_in_one_exec
     assert payload["metrics"] == {f"M{number}": "insufficient_data" for number in range(1, 7)}
     assert payload["failures"] == []
     assert all(
-        payload["stages"][stage] == {"processed": 1, "succeeded": 1, "failed": 0}
+        payload["stages"][stage] == {"processed": 1, "succeeded": 1, "failed": 0, "skipped": 0}
         for stage in cycle.STAGE_NAMES
     )
 
@@ -317,6 +317,7 @@ def test_phase4b_dod2_stage_failure_is_isolated_and_cycle_continues_with_alert(
         "processed": 2,
         "succeeded": 1,
         "failed": 1,
+        "skipped": 0,
     }
     assert summary.stages["validate"].processed == 1
     assert summary.stages["route"].processed == 1

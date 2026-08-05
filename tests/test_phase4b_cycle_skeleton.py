@@ -124,6 +124,6 @@ def test_run_cycle_calculates_missing_schedule_and_leaves_unwired_stages_zero() 
     assert summary.briefing_id
     assert summary.exit_code == 0
     assert all(
-        tally.to_payload() == {"processed": 0, "succeeded": 0, "failed": 0}
+        tally.to_payload() == {"processed": 0, "succeeded": 0, "failed": 0, "skipped": 0}
         for tally in summary.stages.values()
     )

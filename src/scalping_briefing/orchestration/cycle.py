@@ -53,6 +53,9 @@ _DEFAULT_SCHEDULE = ("TUE 08:00", "FRI 08:00")
 _DEFAULT_REPORT_OUTPUT_DIR = Path("storage/ops-reports")
 _EXPECTED_METRIC_IDS = ("M1", "M2", "M3", "M4", "M5", "M6")
 _MAX_FAILURE_REASON_CHARS = 200
+_CLASSIFIABLE_STATES = frozenset(
+    {"collected", "normalized", "deduplicated", "classified"}
+)
 _SECRET_SETTING_NAMES = frozenset(
     {
         "bottoken",
@@ -172,6 +175,7 @@ def _stage_payload(value: Any) -> dict[str, int]:
             "processed": int(value.get("processed", 0)),
             "succeeded": int(value.get("succeeded", 0)),
             "failed": int(value.get("failed", 0)),
+            "skipped": int(value.get("skipped", 0)),
         }
     return StageTally().to_payload()
 
@@ -199,17 +203,24 @@ class StageFailure:
 
 @dataclass
 class StageTally:
-    """Counters for work observed by one orchestration stage."""
+    """Counters for work observed by one orchestration stage.
+
+    ``skipped`` counts inputs the stage was never asked to handle because
+    they were already past it.  A skip is not a failure: it keeps a repeated
+    cycle quiet instead of re-reporting finished work.
+    """
 
     processed: int = 0
     succeeded: int = 0
     failed: int = 0
+    skipped: int = 0
 
     def to_payload(self) -> dict[str, int]:
         return {
             "processed": self.processed,
             "succeeded": self.succeeded,
             "failed": self.failed,
+            "skipped": self.skipped,
         }
 
 
@@ -245,6 +256,7 @@ class CycleSummary:
                     processed=int(value.get("processed", 0)),
                     succeeded=int(value.get("succeeded", 0)),
                     failed=int(value.get("failed", 0)),
+                    skipped=int(value.get("skipped", 0)),
                 )
                 if isinstance(value, Mapping)
                 else StageTally()
@@ -684,6 +696,21 @@ def _validated_payload_result(payload: Any) -> Any:
     return payload
 
 
+def _is_classifiable(document_version: Any) -> bool:
+    """Mirror the classifier's own precondition on the version state.
+
+    ``classify_document`` advances ``collected``/``normalized`` to
+    ``deduplicated`` and accepts ``classified``; anything else raises
+    ``InvalidTransition``.  An unset state belongs to a freshly built record
+    and stays eligible.
+    """
+
+    state = _field(document_version, "processing_status", None)
+    if state is None:
+        return True
+    return str(state) in _CLASSIFIABLE_STATES
+
+
 def _invalid_validation_state(state: str | None) -> Any:
     raise ValueError(
         "candidate validation requires extracted or validated state, "
@@ -718,6 +745,14 @@ def run_candidate_stages(
     routed: list[Any] = []
     for document_version in document_versions:
         identifier = _document_identifier(document_version)
+
+        if not _is_classifiable(document_version):
+            # Collection returns every ingested version, including rows an
+            # earlier cycle already carried to a terminal state.  Re-running
+            # classification on those is an invalid transition, not a
+            # failure, so count the skip and move on.
+            summary.stages["classify"].skipped += 1
+            continue
 
         classification = run_stage(
             summary,
