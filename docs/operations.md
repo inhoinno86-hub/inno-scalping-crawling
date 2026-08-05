@@ -54,6 +54,7 @@ The first command is the required offline gate and excludes integration tests th
 
 - Phase 2: relevance classification, structured strategy extraction, scoring, review queue, and Evidence-backed candidate generation. Deferred because this run only proves collection and Version persistence.
 - Phase 3: scheduled twice-weekly briefing generation, archive rendering, and Telegram delivery. Deferred to keep this entrypoint dry-run and prevent external delivery.
-- Phase 4: dashboards, recurring operational reports, metric-based expansion, and live-source scale decisions. Deferred until collection and review behavior have measured data.
+- Phase 4: six operational metrics, recurring Markdown reports, local metric alerts, four-week expansion eligibility, and Appendix A recalibration recommendations are implemented. Reports are archived below `storage/ops-reports/`; alert artifacts remain below `alerts/` and separate from the delivery channel. This run records recommendations only and does not change source activation or configuration.
+- Phase 4b: end-to-end orchestration wiring remains deferred as a separate run. Connecting collection→classification→extraction→validation→scoring→routing→briefing→dry-run delivery is not part of this run; `run_briefing()` remains the existing collection-only entrypoint.
 
-No deferred phase is activated by `make run-briefing`.
+No deferred phase, including Phase 4b, is activated by `make run-briefing`.
