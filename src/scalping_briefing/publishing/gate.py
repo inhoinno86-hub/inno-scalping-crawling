@@ -261,15 +261,18 @@ def _asserts_nothing(item: object) -> bool:
     if claim is _MISSING or not _empty_claim(claim):
         return False
     field_name = _field(item, "field_name", None)
-    status = _MISSING
-    if isinstance(field_name, str) and field_name.strip():
-        status = _field(item, f"{field_name.strip()}_status", _MISSING)
-        if status is _MISSING:
-            statuses = _field(item, "field_status", None)
-            if statuses is not None:
-                status = _field(statuses, field_name.strip(), _MISSING)
+    if not isinstance(field_name, str) or not field_name.strip():
+        return False
+    status = _field(item, f"{field_name.strip()}_status", _MISSING)
+    if status is _MISSING:
+        statuses = _field(item, "field_status", None)
+        if statuses is None:
+            return False
+        status = _field(statuses, field_name.strip(), _MISSING)
     if status is _MISSING or status is None:
-        return True
+        # An empty claim on its own proves nothing.  Without a recorded status
+        # saying the field is unsupported, the strict requirement stands.
+        return False
     return str(status).strip().lower() in _CLAIMLESS_STATUSES
 
 
@@ -399,14 +402,15 @@ def validate_briefing_item(
     _reject_full_text(item)
     identifier = _item_identifier(item, item_index)
     evidence = _records(_field(item, "evidence", None), name=f"{identifier}.evidence")
-    if not evidence:
-        if _asserts_nothing(item):
-            # An item that carries an explicit, empty claim states nothing, so
-            # there is nothing for Evidence to trace.  Requiring Evidence here
-            # would make one unsupported field of a partially extracted
-            # candidate reject the whole publication input.  Items without a
-            # `claim` key keep the strict contract.
-            return item
+    # An item that carries an explicit, empty claim states nothing, so there is
+    # nothing for Evidence to trace.  Requiring Evidence here would make one
+    # unsupported field of a partially extracted candidate reject the whole
+    # publication input.  Items without a `claim` key, or whose recorded field
+    # status does not agree the field is unsupported, keep the strict contract.
+    # Everything the item still publishes - notably its links - is checked
+    # below either way.
+    claimless = not evidence and _asserts_nothing(item)
+    if not evidence and not claimless:
         raise MissingEvidenceError(
             f"briefing item {identifier!r} requires at least one Evidence record"
         )
@@ -460,7 +464,7 @@ def validate_briefing_item(
             )
         if _safe_source_link(link):
             has_original_link = True
-    if not has_original_link:
+    if not has_original_link and not claimless:
         raise OriginalSourceLinkError(
             f"briefing item {identifier!r} requires an original source link"
         )

@@ -1,6 +1,6 @@
 # 남은 작업 · 결정 대기 항목
 
-마지막 갱신: 2026-08-06 · `make test` 346 passed / 0 failed (오프라인)
+마지막 갱신: 2026-08-06 · `make test` 353 passed / 0 failed (오프라인)
 
 이 문서는 "지금 코드에 없는 것"과 "사람이 결정해야 하는 것"만 담는다. 완료된 범위는
 `docs/operations.md`와 `docs/orchestration-cycle.md`가 기술한다.
@@ -35,14 +35,30 @@
   실제 실패 건수 수준이다.
 - 결정 필요: 보존 키를 신설할지(= `CONFIG_KEYS` 변경, 승인 사항) 운영 스크립트로 정리할지.
 
-### 2.2 실제 승인 흐름이 운영에서 검증되지 않음
+### 2.2 승인→전달 경로: 일부 해결, 하나의 구조적 충돌이 남음
 
-승인된 후보 → 게이트 통과 → dry-run 전달 경로는 **테스트에서만** 증명됐다. 기본 fixture
-실행은 `pending_approval` 브리핑이 게이트에서 멈추는 것이 정상이다
-(`docs/orchestration-cycle.md`의 "게이트 정지" 절).
+**해결됨**: 브리핑 발행 승인 인터페이스가 없어 dry-run 전달이 구조적으로 도달 불가였다.
+`review-cli`에 `briefing-list` / `briefing-decide` / `briefing-deliver`를 추가했다
+(`docs/operations.md`의 "브리핑 발행 승인과 dry-run 전달"). 단일 주장 후보로 구성된
+브리핑은 승인 후 실제로 `Delivery` 레코드까지 생성된다
+(`tests/test_briefing_publication_decision.py`).
 
-- 남은 일: 검토 API로 사람이 실제 승인한 뒤 `make run-briefing-cycle`이 전달까지 가는지
-  한 번 관측하고 그 결과를 문서화.
+**남은 충돌 (미해결, 결정 필요)**: 핵심 필드를 2개 넘게 주장하는 후보가 든 브리핑은 아직
+전달할 수 없다. 실측한 두 요구가 동시에 만족될 수 없다.
+
+- 전달 시 렌더러가 `build_candidate_view`로 필드별 항목을 만들고, **주장하는 필드마다**
+  Evidence를 요구한다.
+- 발행 게이트는 평면 briefing item 하나에 대해 **Evidence 최대 2건**(`MAX_EVIDENCE_QUOTES`)을
+  강제한다. `BriefingItem`도 2건만 저장한다.
+
+Evidence를 2건만 실으면 나머지 주장 필드에서 "requires at least one Evidence record",
+후보의 Evidence 6건을 모두 실으면 "contains 6 Evidence records; at most 2 are publishable"가
+난다. 두 오류 모두 실행으로 확인했다.
+
+- 결정 필요: (a) 2건 상한을 필드별로 적용할지(메시지에 인용이 늘어남), (b) 전달 경로가
+  빌드 경로와 같은 필드별 항목 구조를 쓰도록 payload를 바꿀지, (c) 전달 메시지는 요약만
+  담고 필드별 Evidence 요구를 전달 경로에서 빼는지. 셋 다 발행 콘텐츠 경계(`P3`/`P6`)에
+  닿으므로 사용자 결정 사항이다.
 
 ### 2.3 4주 연속 판정·확장 권고에 쓸 실데이터 없음
 
@@ -53,14 +69,12 @@
 
 ## 3. 문서·저장소 정리
 
-### 3.1 문서가 git에 없는 파일을 인용한다
+### 3.1 문서가 git에 없는 파일을 인용한다 — 해결됨
 
-`.gitignore:22`가 `.loop-engine/`을 제외하므로 추적 파일이 0개인데,
-`docs/orchestration-cycle.md`가 근거로
-`.loop-engine/runs/02ecc401-.../artifacts/run-briefing-cycle.clean-state.txt`,
-`...run-briefing-cycle.repeat-run.txt`를 가리킨다. 다른 사람의 클론에는 존재하지 않는다.
-
-- 선택지: 캡처를 `docs/` 아래로 옮겨 추적하거나, 인용을 제거하고 표의 수치만 남긴다.
+캡처를 `docs/samples/run-briefing-cycle.clean-state.md`와
+`docs/samples/run-briefing-cycle.repeat-run.md`로 옮겨 추적하고
+`docs/orchestration-cycle.md`의 인용을 그쪽으로 바꿨다. `.loop-engine/` 경로를 가리키는
+문서 인용은 더 이상 없다.
 
 ### 3.2 테스트 스위트 시간 증가
 

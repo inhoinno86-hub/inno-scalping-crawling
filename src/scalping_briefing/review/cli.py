@@ -127,7 +127,94 @@ def build_parser() -> argparse.ArgumentParser:
         help="approved, rejected, or archived",
     )
     decide_parser.add_argument("--comment")
+
+    briefing_list_parser = subparsers.add_parser(
+        "briefing-list",
+        help="list briefings and their publication status",
+    )
+    briefing_list_parser.add_argument(
+        "--publication-status",
+        dest="publication_status",
+        help="restrict briefings by publication status",
+    )
+
+    briefing_decide_parser = subparsers.add_parser(
+        "briefing-decide",
+        help="record an operator publication decision for one briefing",
+    )
+    briefing_decide_parser.add_argument("briefing_id")
+    briefing_decide_parser.add_argument(
+        "--reviewer-id",
+        "--reviewer_id",
+        dest="reviewer_id",
+        help="non-empty reviewer identifier",
+    )
+    briefing_decide_parser.add_argument(
+        "--decision",
+        dest="decision",
+        help="approved, rejected, or archived",
+    )
+    briefing_decide_parser.add_argument("--comment")
+
+    briefing_deliver_parser = subparsers.add_parser(
+        "briefing-deliver",
+        help="gate and dry-run deliver one already-approved briefing",
+    )
+    briefing_deliver_parser.add_argument("briefing_id")
+    briefing_deliver_parser.add_argument(
+        "--resend-reason",
+        dest="resend_reason",
+        help="explicit reason recorded for a repeated delivery",
+    )
+    briefing_deliver_parser.add_argument(
+        "--resend-approved-by",
+        dest="resend_approved_by",
+        help="reviewer who approved a repeated delivery",
+    )
     return parser
+
+
+def _deliver_briefing(session: Session, args: argparse.Namespace) -> Any:
+    """Gate and dry-run deliver one already-built, operator-approved briefing.
+
+    Delivery deliberately reuses the stored briefing instead of rebuilding it:
+    a rebuild resets the publication status, because rebuilt content is not
+    what the operator approved.
+    """
+
+    from scalping_briefing.delivery.connector import TelegramDryRunConnector
+    from scalping_briefing.delivery.service import deliver_briefing
+    from scalping_briefing.models import Briefing
+
+    settings = load_config()
+    mode = str(getattr(settings, "DELIVERY_MODE", "dry_run") or "dry_run")
+    if mode != "dry_run":
+        raise ValueError(
+            "only DELIVERY_MODE=dry_run delivery is supported from the review CLI"
+        )
+
+    briefing = session.get(Briefing, args.briefing_id)
+    if briefing is None:
+        raise ValueError(f"briefing not found: {args.briefing_id!r}")
+
+    # `deliver_briefing` runs the publication gate itself as the first
+    # delivery-boundary call, on the payload it builds; gating the raw ORM row
+    # here would check a different shape.
+    delivery = deliver_briefing(
+        session,
+        briefing,
+        connector=TelegramDryRunConnector(settings=settings),
+        settings=settings,
+        resend_reason=args.resend_reason,
+        resend_approved_by=args.resend_approved_by,
+    )
+    if delivery is None:
+        # An empty briefing is a valid report with no delivery target.
+        return None
+    # Mapped while the session is still open: the caller serializes after it
+    # closes, and a detached ORM row cannot refresh itself.
+    session.flush()
+    return _mapped_payload(delivery)
 
 
 def _database_url(value: str | None) -> str:
@@ -161,6 +248,26 @@ def _run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> Any:
             if args.command == "show":
                 result = service.get_candidate(args.candidate_id)
                 return result if result is not None else {"candidate": None}
+            if args.command == "briefing-list":
+                return {
+                    "briefings": service.list_briefings(
+                        publication_status=args.publication_status
+                    )
+                }
+            if args.command == "briefing-decide":
+                reviewer_id, decision = _required_decision_value(parser, args)
+                decided = service.record_briefing_decision(
+                    args.briefing_id,
+                    reviewer_id,
+                    decision,
+                    args.comment,
+                )
+                session.commit()
+                return {"briefing_decision": decided}
+            if args.command == "briefing-deliver":
+                delivered = _deliver_briefing(session, args)
+                session.commit()
+                return {"delivery": delivered}
 
             reviewer_id, decision = _required_decision_value(parser, args)
             review = service.record_decision(

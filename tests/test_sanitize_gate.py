@@ -109,3 +109,37 @@ def test_publication_gate_never_accepts_original_full_text() -> None:
 
     with pytest.raises(OriginalFullTextError):
         validate_publication({"items": [item]})
+
+
+def test_claimless_item_still_rejects_an_unsafe_source_link() -> None:
+    """Skipping the Evidence requirement must not skip link safety.
+
+    An item that asserts nothing needs no Evidence, but whatever link it does
+    carry is still published, so it goes through the same URL checks.
+    """
+
+    claimless = {
+        **_item(),
+        "field_name": "entry_logic",
+        "claim": None,
+        "entry_logic_status": "unknown",
+        "evidence": [],
+    }
+    validate_publication({"items": [claimless]})
+
+    unsafe = {**claimless, "source_url": "javascript:alert('x')"}
+    with pytest.raises(OriginalSourceLinkError):
+        validate_publication({"items": [unsafe]})
+
+
+def test_claimless_item_without_a_recorded_status_stays_strict() -> None:
+    """An empty claim alone is not proof the field is unsupported."""
+
+    undeclared = {
+        **_item(),
+        "field_name": "entry_logic",
+        "claim": None,
+        "evidence": [],
+    }
+    with pytest.raises(MissingEvidenceError):
+        validate_publication({"items": [undeclared]})

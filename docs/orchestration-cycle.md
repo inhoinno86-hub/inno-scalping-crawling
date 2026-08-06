@@ -191,8 +191,7 @@ stage counts are not interchangeable.
 
 ### Clean-state first run
 
-Captured in
-`.loop-engine/runs/02ecc401-5010-45a5-801f-f3c0317b2849/artifacts/run-briefing-cycle.clean-state.txt`.
+Captured in [`docs/samples/run-briefing-cycle.clean-state.md`](samples/run-briefing-cycle.clean-state.md).
 
 | Stage | Captured result |
 | --- | --- |
@@ -216,8 +215,7 @@ breached result. The report is archived below `storage/ops-reports/`.
 
 ### Already-processed-database rerun
 
-Captured in
-`.loop-engine/runs/02ecc401-5010-45a5-801f-f3c0317b2849/artifacts/run-briefing-cycle.repeat-run.txt`.
+Captured in [`docs/samples/run-briefing-cycle.repeat-run.md`](samples/run-briefing-cycle.repeat-run.md).
 It uses the same scheduled occurrence, and therefore the same `briefing_id`,
 against the database the first run left behind.
 

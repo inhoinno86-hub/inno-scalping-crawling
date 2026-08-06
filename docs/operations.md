@@ -57,6 +57,33 @@ The first command is the required offline gate and excludes integration tests th
 - Phase 4: six operational metrics, recurring Markdown reports, local metric alerts, four-week expansion eligibility, and Appendix A recalibration recommendations are implemented. Reports are archived below `storage/ops-reports/`; alert artifacts remain below `alerts/` and separate from the delivery channel. This run records recommendations only and does not change source activation or configuration.
 - Phase 4b: end-to-end orchestration wiring is implemented as a separate entrypoint. `run_briefing()` remains the existing collection-only entrypoint; `run_briefing_cycle()` connects collection→classification→extraction→validation→evidence→scoring→novelty→routing→briefing→gate→dry-run delivery→metrics→report→local alerting. With default fixture data, the gate stops the cycle before delivery until approved records exist. Re-running the same schedule skips document versions an earlier run already finished, so a repeat run reports skips instead of writing one failure alert per document.
 
+### 브리핑 발행 승인과 dry-run 전달
+
+사이클은 후보도 브리핑도 자동 승인하지 않는다. `build_briefing`은 항상
+`publication_status = pending_approval`로 남기고 발행 게이트는 `approved`/`published`
+또는 명시적 내부 초안만 통과시키므로, 전달은 운영자의 명시적 결정을 거친다.
+
+```
+# 1) 검토 큐 확인과 후보 결정
+PYTHONPATH=src .venv/bin/python -m scalping_briefing.review.cli list --status needs_review
+PYTHONPATH=src .venv/bin/python -m scalping_briefing.review.cli decide <candidate_id> \
+    --reviewer-id <operator> --decision approved
+
+# 2) 사이클 재실행 — 승인 항목이 브리핑 본문에 들어간다
+make run-briefing-cycle
+
+# 3) 브리핑 발행 승인과 dry-run 전달
+PYTHONPATH=src .venv/bin/python -m scalping_briefing.review.cli briefing-list
+PYTHONPATH=src .venv/bin/python -m scalping_briefing.review.cli briefing-decide <briefing_id> \
+    --reviewer-id <operator> --decision approved
+PYTHONPATH=src .venv/bin/python -m scalping_briefing.review.cli briefing-deliver <briefing_id>
+```
+
+`briefing-deliver`는 이미 만들어진 브리핑을 **다시 빌드하지 않고** 전달한다. 재빌드는
+내용을 바꾸므로 `publication_status`를 `pending_approval`로 되돌리며, 이는 운영자가 승인한
+내용과 다른 것을 보내지 않기 위한 의도된 동작이다. `DELIVERY_MODE`가 `dry_run`이 아니면
+이 명령은 거부한다.
+
 ### Phase 4b cycle procedure
 
 Run one offline-safe orchestration cycle with:

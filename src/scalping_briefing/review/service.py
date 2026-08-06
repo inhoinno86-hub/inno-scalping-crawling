@@ -15,6 +15,7 @@ from sqlalchemy import inspect, select
 from sqlalchemy.orm import Session, selectinload
 
 from scalping_briefing.models import (
+    Briefing,
     Document,
     DocumentVersion,
     Evidence,
@@ -25,6 +26,12 @@ from scalping_briefing.models.base import utc_now
 from scalping_briefing.pipeline import state_machine
 from scalping_briefing.pipeline.validate import CORE_FIELDS
 from scalping_briefing.publishing import candidate_view
+
+
+# An operator decides a briefing's publication status; `published` is set by
+# the delivery path, not by a reviewer, and is therefore not decidable here.
+BRIEFING_PUBLICATION_DECISIONS = frozenset({"approved", "rejected", "archived"})
+BRIEFING_DECIDABLE_STATUSES = frozenset({"draft", "pending_approval"})
 
 
 def _text_link(value: Any) -> str | None:
@@ -170,6 +177,67 @@ class ReviewService:
         self.session.add(review)
         self.session.flush()
         return review
+
+    def list_briefings(
+        self,
+        publication_status: str | Any | None = None,
+    ) -> list[Briefing]:
+        """Return briefings, optionally restricted by ``publication_status``."""
+
+        statement = select(Briefing)
+        if publication_status is not None:
+            value = getattr(publication_status, "value", publication_status)
+            statement = statement.where(Briefing.publication_status == value)
+        statement = statement.order_by(Briefing.scheduled_for, Briefing.briefing_id)
+        return list(self.session.scalars(statement).all())
+
+    def record_briefing_decision(
+        self,
+        briefing_id: str,
+        reviewer_id: str,
+        decision: str,
+        comment: str | None = None,
+    ) -> dict[str, Any]:
+        """Record an operator's publication decision for one briefing.
+
+        ``build_briefing`` leaves every briefing at ``pending_approval`` and
+        the publication gate accepts only ``approved``/``published`` or an
+        explicit internal draft, so this is the only way a briefing becomes
+        deliverable.  It is deliberately an operator action: no pipeline stage
+        calls it, and a rebuild resets the status because rebuilt content is
+        not what the operator approved.
+        """
+
+        if not isinstance(reviewer_id, str) or not reviewer_id.strip():
+            raise ValueError("reviewer_id must be a non-empty string")
+
+        target = str(getattr(decision, "value", decision) or "").strip().lower()
+        if target not in BRIEFING_PUBLICATION_DECISIONS:
+            allowed = ", ".join(sorted(BRIEFING_PUBLICATION_DECISIONS))
+            raise ValueError(f"publication decision must be one of: {allowed}")
+
+        briefing = self.session.get(Briefing, briefing_id)
+        if briefing is None:
+            raise ValueError(f"briefing not found: {briefing_id!r}")
+
+        previous = str(briefing.publication_status or "")
+        if previous not in BRIEFING_DECIDABLE_STATUSES:
+            decidable = ", ".join(sorted(BRIEFING_DECIDABLE_STATUSES))
+            raise ValueError(
+                f"briefing {briefing_id!r} has publication status {previous!r}; "
+                f"only {decidable} can be decided"
+            )
+
+        briefing.publication_status = target
+        self.session.flush()
+        return {
+            "briefing_id": briefing.briefing_id,
+            "reviewer_id": reviewer_id.strip(),
+            "decision": target,
+            "previous_publication_status": previous,
+            "comment": comment,
+            "decided_at": utc_now().isoformat(),
+        }
 
     def amend_field(
         self,
@@ -325,4 +393,8 @@ class ReviewService:
         return result
 
 
-__all__ = ["ReviewService"]
+__all__ = [
+    "BRIEFING_DECIDABLE_STATUSES",
+    "BRIEFING_PUBLICATION_DECISIONS",
+    "ReviewService",
+]
