@@ -203,3 +203,74 @@ def test_empty_or_failed_source_window_is_successfully_reported(tmp_path, monkey
     finally:
         session.close()
         engine.dispose()
+
+
+def test_partially_evidenced_queue_candidate_does_not_fail_the_whole_briefing(
+    tmp_path, monkeypatch
+) -> None:
+    """One unsupported field must not take the scheduled briefing down.
+
+    A queued candidate that carries Evidence for some core fields and leaves
+    the rest unknown is normal review material.  The briefing has to build,
+    publish only the evidenced claims, and leave the unsupported field empty.
+    """
+
+    monkeypatch.chdir(tmp_path)
+    engine, session, version = _database(tmp_path)
+    unsupported = {"entry_logic", "exit_logic"}
+    try:
+        # Built without the unsupported Evidence rows at all: creating an
+        # Evidence object already links it to its candidate, so filtering the
+        # list afterwards would leave the relationship in place.
+        partial = StrategyCandidate(
+            candidate_id="partial-1",
+            canonical_name="Strategy partial-1",
+            summary="A bounded strategy summary.",
+            review_status="needs_review",
+            created_at=datetime(2026, 8, 3, tzinfo=UTC),
+            core_hypothesis="The documented condition matters.",
+            signal_inputs=["quotes"],
+            entry_logic=None,
+            exit_logic=None,
+            required_data=["quotes"],
+            risk_notes="Latency risk.",
+            field_status={
+                field: "unknown" if field in unsupported else "explicit"
+                for field in CORE_FIELDS
+            },
+            relevance_status="relevant",
+            value_score=80,
+            document_version_ids=[version.document_version_id],
+        )
+        supported = [
+            Evidence(
+                evidence_id=f"partial-1-{field}",
+                document_version=version,
+                strategy_candidate=partial,
+                field_name=field,
+                quote=f"Evidence for {field}.",
+                section_or_locator=field,
+            )
+            for field in CORE_FIELDS
+            if field not in unsupported
+        ]
+        session.add_all([partial, *supported])
+        session.commit()
+
+        briefing = build_briefing(
+            session,
+            scheduled_for=datetime(2026, 8, 4, 8, tzinfo=UTC),
+            trigger_type="scheduled",
+            settings=SETTINGS,
+        )
+
+        assert briefing.markdown_location is not None
+        assert Path(briefing.markdown_location).is_file()
+        assert [item.strategy_candidate_id for item in briefing.items] == ["partial-1"]
+        body = Path(briefing.markdown_location).read_text(encoding="utf-8")
+        assert "Evidence for core_hypothesis." in body
+        assert "Evidence for entry_logic." not in body
+        assert "partial-1-entry_logic" not in body
+    finally:
+        session.close()
+        engine.dispose()

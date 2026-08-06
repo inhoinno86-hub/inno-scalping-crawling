@@ -244,6 +244,25 @@ delivery, and reusing a briefing identity never makes a `failed`,
 `background_only`, or `access_denied` document version eligible for
 classification again.
 
+### Partially supported candidates stay publishable
+
+The publication gate requires Evidence for every claim a briefing item makes,
+not for every field the renderer lists. A queued candidate that supports some
+core fields and leaves the rest `unknown` therefore builds normally: the
+evidenced claims are published with their quotes, and an unsupported field is
+rendered empty with no Evidence attached.
+
+The strict half of the contract is unchanged. An item that carries a claim
+still fails with `MissingEvidenceError` when its Evidence is missing, and a
+briefing item shape without a `claim` key keeps the original all-or-nothing
+requirement. Only an item that carries an explicit, empty claim whose recorded
+field status agrees it is unsupported may skip Evidence, so a field can never
+lose its Evidence by turning up empty while its status still says `explicit`.
+
+Before this boundary existed, one unsupported field of one queued candidate
+raised `MissingEvidenceError` from `build_briefing` and took the whole
+scheduled briefing down.
+
 ### Fixture recordings survive a rebuilt database
 
 Every prompt embeds the row's `document_version_id`, which is a fresh UUID for

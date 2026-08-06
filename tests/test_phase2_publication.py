@@ -267,3 +267,34 @@ def test_candidate_view_routes_item_quote_limits_through_publication_gate() -> N
 
     with pytest.raises(EvidenceQuoteError):
         build_candidate_view(_payload(), too_long)
+
+
+def test_candidate_view_allows_a_field_that_asserts_nothing_and_has_no_evidence() -> None:
+    """An unknown field makes no claim, so it needs no Evidence to support it.
+
+    A partially extracted candidate used to make the whole publication input
+    invalid: every core field became an item and every item demanded Evidence,
+    including the fields the source never supported.
+    """
+
+    payload = _payload()
+    payload["entry_logic"] = None
+    payload["entry_logic_status"] = "unknown"
+    payload["field_status"] = {**payload["field_status"], "entry_logic": "unknown"}  # type: ignore[dict-item]
+    evidence = [item for item in _all_evidence() if item["field_name"] != "entry_logic"]
+
+    view = build_candidate_view(payload, evidence)
+
+    items = {item["field_name"]: item for item in view["items"]}  # type: ignore[index]
+    assert items["entry_logic"]["claim"] is None
+    assert items["entry_logic"]["evidence"] == []
+    assert len(items["core_hypothesis"]["evidence"]) == 1
+
+
+def test_candidate_view_still_rejects_a_claim_that_lost_its_evidence() -> None:
+    payload = _payload()
+    payload["entry_logic_status"] = "unknown"
+    evidence = [item for item in _all_evidence() if item["field_name"] != "entry_logic"]
+
+    with pytest.raises(MissingEvidenceError):
+        build_candidate_view(payload, evidence)

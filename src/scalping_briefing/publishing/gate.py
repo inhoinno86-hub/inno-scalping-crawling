@@ -234,6 +234,45 @@ def _filled(value: object) -> bool:
     return isinstance(value, str) and bool(value.strip())
 
 
+_CLAIMLESS_STATUSES = frozenset({"unknown", "not_applicable"})
+
+
+def _empty_claim(value: object) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str):
+        return not value.strip()
+    if isinstance(value, (list, tuple, set, frozenset, dict)):
+        return not value
+    return False
+
+
+def _asserts_nothing(item: object) -> bool:
+    """Return whether the item publishes no claim at all.
+
+    Only an item that carries a ``claim`` key qualifies: the per-field records
+    the candidate view builds.  Any other briefing item shape keeps the strict
+    Evidence requirement.  A recorded field status must also agree that the
+    field is unsupported, so an ``explicit`` claim can never lose its Evidence
+    by turning up empty.
+    """
+
+    claim = _field(item, "claim", _MISSING)
+    if claim is _MISSING or not _empty_claim(claim):
+        return False
+    field_name = _field(item, "field_name", None)
+    status = _MISSING
+    if isinstance(field_name, str) and field_name.strip():
+        status = _field(item, f"{field_name.strip()}_status", _MISSING)
+        if status is _MISSING:
+            statuses = _field(item, "field_status", None)
+            if statuses is not None:
+                status = _field(statuses, field_name.strip(), _MISSING)
+    if status is _MISSING or status is None:
+        return True
+    return str(status).strip().lower() in _CLAIMLESS_STATUSES
+
+
 def _safe_source_link(value: object) -> bool:
     if not _filled(value):
         return False
@@ -361,6 +400,13 @@ def validate_briefing_item(
     identifier = _item_identifier(item, item_index)
     evidence = _records(_field(item, "evidence", None), name=f"{identifier}.evidence")
     if not evidence:
+        if _asserts_nothing(item):
+            # An item that carries an explicit, empty claim states nothing, so
+            # there is nothing for Evidence to trace.  Requiring Evidence here
+            # would make one unsupported field of a partially extracted
+            # candidate reject the whole publication input.  Items without a
+            # `claim` key keep the strict contract.
+            return item
         raise MissingEvidenceError(
             f"briefing item {identifier!r} requires at least one Evidence record"
         )
