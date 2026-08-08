@@ -733,6 +733,7 @@ def run_candidate_stages(
     settings: Any,
     summary: CycleSummary,
     alerts_dir: str | Path,
+    llm_client: Any = None,
     now: datetime | None = None,
 ) -> list[Any]:
     """Run candidate stages 2--8 for each document version in order.
@@ -740,6 +741,13 @@ def run_candidate_stages(
     Downstream calls are made only when the preceding stage returned the
     input it requires.  This keeps skipped tallies at zero and lets
     :func:`run_stage` isolate failures per document and stage.
+
+    ``llm_client`` is an opt-in override for the extraction stage.  When
+    omitted (``None``), any ``llm_client`` already exposed on ``settings``
+    (a test double, for example) is still honored via
+    :func:`_setting_kwargs`, and if neither supplies one,
+    ``extract_strategy_candidate`` falls back to its own default
+    (``FixtureLLMClient``) -- unchanged from before this parameter existed.
     """
 
     routed: list[Any] = []
@@ -768,15 +776,18 @@ def run_candidate_stages(
         if classification is None or not _is_relevant(classification):
             continue
 
+        extract_kwargs = _setting_kwargs(settings, "llm_client", "quote_max_chars")
+        if llm_client is not None:
+            extract_kwargs["llm_client"] = llm_client
         extraction = run_stage(
             summary,
             "extract",
             identifier,
-            lambda document_version=document_version, classification=classification: extract_strategy_candidate(
+            lambda document_version=document_version, classification=classification, extract_kwargs=extract_kwargs: extract_strategy_candidate(
                 document_version,
                 session=session,
                 classification=_classification_payload(classification),
-                **_setting_kwargs(settings, "llm_client", "quote_max_chars"),
+                **extract_kwargs,
             ),
             alerts_dir=alerts_dir,
         )
@@ -925,8 +936,14 @@ def run_cycle(
     observation_window: Any = None,
     now: datetime | None = None,
     run_attempt: int = 1,
+    llm_client: Any = None,
 ) -> CycleSummary:
-    """Run collection, candidate processing, briefing, gate, delivery, ops."""
+    """Run collection, candidate processing, briefing, gate, delivery, ops.
+
+    ``llm_client`` is an opt-in override forwarded to the extraction stage
+    (see :func:`run_candidate_stages`).  Leaving it unset reproduces prior
+    behavior exactly.
+    """
 
     if alerts_dir is None:
         alerts_dir = _setting(settings, "alerts_dir", "alerts/")
@@ -978,6 +995,7 @@ def run_cycle(
         settings=settings,
         summary=summary,
         alerts_dir=alerts_dir,
+        llm_client=llm_client,
         now=now,
     )
 

@@ -178,21 +178,60 @@ def run_briefing() -> int:
     return 0
 
 
-def run_briefing_cycle() -> int:
-    """Run the Phase 4b orchestration cycle and print its summary."""
+def run_briefing_cycle(llm_client: Any = None) -> int:
+    """Run the Phase 4b orchestration cycle and print its summary.
+
+    ``llm_client`` is opt-in.  Leave it unset (``None``, the default) and
+    behavior is byte-for-byte unchanged from before this parameter existed:
+    unless ``LLM_MODE=="live"`` opts in a real client via
+    :func:`_llm_client_for_settings`, every extraction call falls back to
+    the pipeline's own default (``FixtureLLMClient``).
+    """
 
     settings = load_config()
     engine = create_engine(settings.DATABASE_URL)
     session = Session(engine)
+    selected_llm_client = (
+        llm_client if llm_client is not None else _llm_client_for_settings(settings)
+    )
     try:
         from .orchestration.cycle import run_cycle
 
-        summary = run_cycle(session, settings=settings)
+        if selected_llm_client is not None:
+            summary = run_cycle(session, settings=settings, llm_client=selected_llm_client)
+        else:
+            summary = run_cycle(session, settings=settings)
     finally:
         session.close()
         engine.dispose()
     print(summary.to_json())
     return summary.exit_code
+
+
+def _llm_client_for_settings(settings: Any) -> Any | None:
+    """Assemble a live local-LLM client only when ``LLM_MODE`` opts in.
+
+    This is the sole assembly point for
+    :class:`~scalping_briefing.llm.local_ollama.LocalLLMClient`.  It returns
+    ``None`` for every other case -- including a fixture default ``LLM_MODE``
+    and settings objects (such as lightweight test doubles) that do not
+    expose ``LLM_MODE`` at all -- which keeps ``run_briefing_cycle``'s
+    default behavior unchanged: each pipeline stage falls back to its own
+    default (``FixtureLLMClient``). No Ollama health check or auto-start is
+    performed here; a dead server surfaces as an exception from
+    ``LocalLLMClient.complete()``, handled by the existing
+    ``run_stage``/``alerts/`` isolation path.
+    """
+
+    try:
+        mode = getattr(settings, "LLM_MODE")
+    except AttributeError:
+        mode = None
+    if mode != "live":
+        return None
+    from .llm.local_ollama import LocalLLMClient
+
+    return LocalLLMClient()
 
 
 def _collection_target(source: SourceRecord) -> str:
