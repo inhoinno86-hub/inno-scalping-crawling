@@ -13,10 +13,11 @@ from pathlib import Path
 from typing import Any
 
 from .fixture import prompt_hash
+from .schema_guard import load_strategy_candidate_schema
 
 
 CLASSIFICATION_PROMPT_VERSION = "phase2-classification-v1"
-EXTRACTION_PROMPT_VERSION = "phase2-extraction-v1"
+EXTRACTION_PROMPT_VERSION = "phase2-extraction-v2"
 PROMPT_VERSION = EXTRACTION_PROMPT_VERSION
 
 _UNTRUSTED_DOCUMENT_NOTICE = (
@@ -190,15 +191,30 @@ def build_extraction_prompt(
         metadata=metadata,
     )
     payload["classification"] = _json_safe(dict(classification or {}))
+    schema = load_strategy_candidate_schema()
+    required_fields = list(schema.get("required", ()))
     payload["output_contract"] = {
         "schema": "schemas/strategy_candidate.schema.json",
+        "json_schema": schema,
         "unknown_rule": "Use null/empty value plus *_status=unknown when source has no evidence.",
         "conflicting_rule": "Use *_status=conflicting when source evidence conflicts.",
+        "required_fields_checklist": required_fields,
+        "field_status_rule": (
+            "field_status must be a non-empty object with one entry per core field "
+            "(core_hypothesis, signal_inputs, entry_logic, exit_logic, required_data, "
+            "risk_notes), mirroring each field's own *_status value."
+        ),
         "document_version_id": payload["document_version_id"],
     }
     return _prompt(
-        "extract one strategy candidate; preserve unknown and conflicting fields; "
-        "do not infer unsupported rules, parameters, performance, or risk",
+        "extract one strategy candidate; the response object must use exactly the "
+        "property names, required fields, and enum values defined in "
+        "output_contract.json_schema, and no other properties; before returning, "
+        "verify every name in output_contract.required_fields_checklist is present "
+        "in the response, including candidate_id, canonical_name, and summary, and "
+        "that field_status follows output_contract.field_status_rule; preserve "
+        "unknown and conflicting fields; do not infer unsupported rules, parameters, "
+        "performance, or risk",
         EXTRACTION_PROMPT_VERSION,
         payload,
     )

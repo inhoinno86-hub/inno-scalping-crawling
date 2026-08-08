@@ -56,7 +56,7 @@ def test_stable_content_key_survives_a_new_document_version_id(tmp_path) -> None
     assert prompt_hash(recorded) != prompt_hash(replayed)
     key = stable_prompt_key(recorded)
     assert key == stable_prompt_key(replayed)
-    assert key == "stable:phase2-extraction-v1:sha256:abc"
+    assert key == "stable:phase2-extraction-v2:sha256:abc"
 
     path = tmp_path / "responses.json"
     path.write_text(
