@@ -22,3 +22,6 @@ __pycache__/
 .loop-engine/
 .venv/
 .pytest_cache/
+
+intent-docs/
+to-do-prompts/
