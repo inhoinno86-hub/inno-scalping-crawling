@@ -183,7 +183,8 @@ def test_run_briefing_cycle_assembles_local_llm_client_when_live(monkeypatch) ->
     constructed: list[object] = []
 
     class RecordingLocalLLMClient:
-        def __init__(self) -> None:
+        def __init__(self, max_tokens: object = None) -> None:
+            self.max_tokens = max_tokens
             constructed.append(self)
 
     def run_cycle(selected_session, *, settings, llm_client=None):
@@ -202,6 +203,7 @@ def test_run_briefing_cycle_assembles_local_llm_client_when_live(monkeypatch) ->
 
     assert run_briefing_cycle() == 0
     assert len(constructed) == 1
+    assert constructed[0].max_tokens == 2000
     assert run_cycle_calls == [
         {"session": session, "settings": settings, "llm_client": constructed[0]}
     ]

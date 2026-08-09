@@ -178,7 +178,7 @@ def run_briefing() -> int:
     return 0
 
 
-def run_briefing_cycle(llm_client: Any = None) -> int:
+def run_briefing_cycle(llm_client: Any = None, approvals: Any = None) -> int:
     """Run the Phase 4b orchestration cycle and print its summary.
 
     ``llm_client`` is opt-in.  Leave it unset (``None``, the default) and
@@ -186,9 +186,15 @@ def run_briefing_cycle(llm_client: Any = None) -> int:
     unless ``LLM_MODE=="live"`` opts in a real client via
     :func:`_llm_client_for_settings`, every extraction call falls back to
     the pipeline's own default (``FixtureLLMClient``).
+
+    ``approvals`` is opt-in and forwarded to :func:`load_config` verbatim
+    (see its docstring: approval is deliberately an explicit call argument,
+    never an environment variable, so a live-cost or live-delivery mode can
+    never turn itself on silently). Leaving it unset reproduces the exact
+    prior ``load_config()`` call.
     """
 
-    settings = load_config()
+    settings = load_config(approvals=approvals) if approvals is not None else load_config()
     engine = create_engine(settings.DATABASE_URL)
     session = Session(engine)
     selected_llm_client = (
@@ -231,7 +237,8 @@ def _llm_client_for_settings(settings: Any) -> Any | None:
         return None
     from .llm.local_ollama import LocalLLMClient
 
-    return LocalLLMClient()
+    max_tokens = getattr(settings, "LLM_RUN_MAX_TOKENS", None)
+    return LocalLLMClient(max_tokens=max_tokens)
 
 
 def _collection_target(source: SourceRecord) -> str:

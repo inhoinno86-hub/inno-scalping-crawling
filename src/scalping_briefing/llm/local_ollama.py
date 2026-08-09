@@ -24,7 +24,10 @@ from scalping_briefing.llm.schema_guard import (
 
 DEFAULT_MODEL = "qwen2.5:7b-instruct-q4_K_M"
 DEFAULT_BASE_URL = "http://127.0.0.1:11434"
-DEFAULT_TIMEOUT = 60.0
+# Measured against the real qwen2.5:7b-instruct-q4_K_M model: single calls
+# took up to ~600s (see tests/test_phase2_local_llm_integration.py). A
+# shorter default (60s) timed out every real extraction call in this project.
+DEFAULT_TIMEOUT = 600.0
 MAX_ATTEMPTS = 2
 
 
@@ -36,10 +39,12 @@ class LocalLLMClient:
         model: str = DEFAULT_MODEL,
         base_url: str = DEFAULT_BASE_URL,
         timeout: float = DEFAULT_TIMEOUT,
+        max_tokens: int | None = None,
     ) -> None:
         self.model = model
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
+        self.max_tokens = max_tokens
         self._last_prompt: str | None = None
         self._last_raw_responses: list[Mapping[str, Any]] | None = None
 
@@ -50,12 +55,15 @@ class LocalLLMClient:
         return response.json()
 
     def complete(self, prompt: str, **kwargs: Any) -> Any:
+        options: dict[str, Any] = {"temperature": 0.1}
+        if self.max_tokens is not None:
+            options["num_predict"] = self.max_tokens
         payload = {
             "model": self.model,
             "prompt": prompt,
             "stream": False,
             "format": "json",
-            "options": {"temperature": 0.1},
+            "options": options,
         }
         raw = self._post(payload)
         parsed = json.loads(raw["response"])
