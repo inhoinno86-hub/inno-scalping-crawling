@@ -17,6 +17,8 @@ from os import PathLike
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
+import httpx
+
 from scalping_briefing.logging_setup import log_event, mask_secrets
 from scalping_briefing.publishing.briefing_render import render_briefing_markdown
 from scalping_briefing.storage.files import LocalFileStorage
@@ -218,8 +220,112 @@ class TelegramDryRunConnector:
         )
 
 
+TELEGRAM_API_BASE = "https://api.telegram.org"
+_TELEGRAM_MESSAGE_LIMIT = 4096
+DEFAULT_LIVE_SEND_TIMEOUT = 10.0
+
+
+class TelegramSendError(DeliveryConnectorError):
+    """Raised when a live Telegram Bot API send fails or is rejected."""
+
+
+def _chunk_message(message: str, limit: int = _TELEGRAM_MESSAGE_LIMIT) -> list[str]:
+    """Split on Telegram's hard per-message character limit, never truncate."""
+
+    if not message:
+        return [""]
+    return [message[index : index + limit] for index in range(0, len(message), limit)]
+
+
+class TelegramLiveConnector:
+    """Telegram connector that performs a real Bot API ``sendMessage`` call.
+
+    Credentials (``TELEGRAM_BOT_TOKEN``, ``TELEGRAM_CHAT_ID``) are read from
+    the process environment at send time only, never accepted as
+    constructor/configuration values -- same rule as
+    :class:`TelegramDryRunConnector`. When ``send`` is called with
+    ``dry_run=True`` this delegates to an internal
+    :class:`TelegramDryRunConnector` for identical local-artifact behavior
+    (audit parity); a live network call only happens when ``dry_run=False``.
+    """
+
+    channel = DEFAULT_CHANNEL
+
+    def __init__(
+        self,
+        storage_root: str | PathLike[str] = DEFAULT_STORAGE_ROOT,
+        *,
+        settings: Any | None = None,
+        storage: LocalFileStorage | None = None,
+        artifact_root: str | PathLike[str] | None = None,
+        logger: logging.Logger | None = None,
+        timeout: float = DEFAULT_LIVE_SEND_TIMEOUT,
+    ) -> None:
+        self._dry_run_connector = TelegramDryRunConnector(
+            storage_root,
+            settings=settings,
+            storage=storage,
+            artifact_root=artifact_root,
+            logger=logger,
+        )
+        self.settings = settings
+        self.storage = self._dry_run_connector.storage
+        self.logger = logger or logging.getLogger(__name__)
+        self.timeout = timeout
+
+    def render(self, briefing_payload: Any) -> str:
+        return self._dry_run_connector.render(briefing_payload)
+
+    def send(self, message: str, *, dry_run: bool) -> DeliveryAttemptResult:
+        if not isinstance(message, str):
+            raise TypeError("message must be a string")
+        if dry_run:
+            return self._dry_run_connector.send(message, dry_run=True)
+
+        bot_token = os.environ.get("TELEGRAM_BOT_TOKEN")
+        chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+        if not bot_token or not chat_id:
+            raise TelegramSendError(
+                "TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID must both be set in "
+                "the process environment for a live send"
+            )
+
+        url = f"{TELEGRAM_API_BASE}/bot{bot_token}/sendMessage"
+        last_message_id: Any = None
+        for chunk in _chunk_message(message):
+            response = httpx.post(
+                url,
+                json={"chat_id": chat_id, "text": chunk},
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+            payload = response.json()
+            if not payload.get("ok"):
+                raise TelegramSendError(f"Telegram API rejected the message: {payload}")
+            last_message_id = payload.get("result", {}).get("message_id")
+
+        content_hash = hashlib.sha256(message.encode("utf-8")).hexdigest()
+        log_event(
+            self.logger,
+            logging.INFO,
+            "telegram_delivery_live",
+            channel=self.channel,
+            status="success",
+            delivery_mode="live",
+            content_hash=content_hash,
+        )
+        return DeliveryAttemptResult(
+            channel=self.channel,
+            content_hash=content_hash,
+            status="success",
+            dry_run=False,
+            provider_reference=str(last_message_id) if last_message_id is not None else None,
+        )
+
+
 __all__ = [
     "DEFAULT_CHANNEL",
+    "DEFAULT_LIVE_SEND_TIMEOUT",
     "DEFAULT_STORAGE_ROOT",
     "DeliveryAttemptResult",
     "DeliveryConnector",
@@ -227,5 +333,8 @@ __all__ = [
     "DeliveryModeError",
     "LiveDeliveryNotSupported",
     "LiveDeliveryRejected",
+    "TELEGRAM_API_BASE",
     "TelegramDryRunConnector",
+    "TelegramLiveConnector",
+    "TelegramSendError",
 ]

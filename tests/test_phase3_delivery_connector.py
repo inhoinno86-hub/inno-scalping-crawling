@@ -13,6 +13,8 @@ from scalping_briefing.delivery.connector import (
     DeliveryConnector,
     LiveDeliveryRejected,
     TelegramDryRunConnector,
+    TelegramLiveConnector,
+    TelegramSendError,
 )
 from scalping_briefing.logging_setup import configure_logging
 
@@ -123,3 +125,118 @@ def test_non_dry_run_flag_is_rejected_even_with_default_mode(
 
     with pytest.raises(LiveDeliveryRejected):
         connector.send("must not be sent", dry_run=False)
+
+
+def test_live_connector_dry_run_delegates_without_network(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    def blocked_post(*args: object, **kwargs: object) -> None:
+        raise AssertionError("dry-run must not call the Telegram API")
+
+    monkeypatch.setattr("scalping_briefing.delivery.connector.httpx.post", blocked_post)
+    connector = TelegramLiveConnector(storage_root=tmp_path / "storage")
+
+    result = connector.send("local dry-run via live connector", dry_run=True)
+
+    assert result.status == "success"
+    assert result.dry_run is True
+    assert result.artifact_path is not None
+
+
+def test_live_connector_sends_one_real_message_when_not_dry_run(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "test-token")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "12345")
+    calls: list[dict[str, object]] = []
+
+    class FakeResponse:
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self) -> dict[str, object]:
+            return {"ok": True, "result": {"message_id": 987}}
+
+    def fake_post(url: str, *, json: dict[str, object], timeout: float) -> FakeResponse:
+        calls.append({"url": url, "json": json, "timeout": timeout})
+        return FakeResponse()
+
+    monkeypatch.setattr("scalping_briefing.delivery.connector.httpx.post", fake_post)
+    connector = TelegramLiveConnector(storage_root=tmp_path / "storage")
+
+    result = connector.send("real message text", dry_run=False)
+
+    assert len(calls) == 1
+    assert calls[0]["url"] == "https://api.telegram.org/bottest-token/sendMessage"
+    assert calls[0]["json"] == {"chat_id": "12345", "text": "real message text"}
+    assert result.status == "success"
+    assert result.dry_run is False
+    assert result.provider_reference == "987"
+
+
+def test_live_connector_raises_without_credentials(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
+    monkeypatch.delenv("TELEGRAM_CHAT_ID", raising=False)
+
+    def blocked_post(*args: object, **kwargs: object) -> None:
+        raise AssertionError("must not call the API without credentials")
+
+    monkeypatch.setattr("scalping_briefing.delivery.connector.httpx.post", blocked_post)
+    connector = TelegramLiveConnector(storage_root=tmp_path / "storage")
+
+    with pytest.raises(TelegramSendError, match="TELEGRAM_BOT_TOKEN"):
+        connector.send("must not be sent", dry_run=False)
+
+
+def test_live_connector_raises_on_api_rejection(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "test-token")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "12345")
+
+    class RejectedResponse:
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self) -> dict[str, object]:
+            return {"ok": False, "description": "chat not found"}
+
+    monkeypatch.setattr(
+        "scalping_briefing.delivery.connector.httpx.post",
+        lambda *args, **kwargs: RejectedResponse(),
+    )
+    connector = TelegramLiveConnector(storage_root=tmp_path / "storage")
+
+    with pytest.raises(TelegramSendError, match="chat not found"):
+        connector.send("must not be sent", dry_run=False)
+
+
+def test_live_connector_chunks_long_messages_without_truncating(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "test-token")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "12345")
+    sent_chunks: list[str] = []
+
+    class FakeResponse:
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self) -> dict[str, object]:
+            return {"ok": True, "result": {"message_id": len(sent_chunks)}}
+
+    def fake_post(url: str, *, json: dict[str, object], timeout: float) -> FakeResponse:
+        sent_chunks.append(json["text"])
+        return FakeResponse()
+
+    monkeypatch.setattr("scalping_briefing.delivery.connector.httpx.post", fake_post)
+    connector = TelegramLiveConnector(storage_root=tmp_path / "storage")
+    long_message = "x" * 9000
+
+    connector.send(long_message, dry_run=False)
+
+    assert len(sent_chunks) == 3
+    assert "".join(sent_chunks) == long_message
+    assert all(len(chunk) <= 4096 for chunk in sent_chunks)

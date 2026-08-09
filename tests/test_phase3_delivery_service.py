@@ -156,6 +156,26 @@ def test_first_delivery_records_all_delivery_fields() -> None:
         _close(session)
 
 
+def test_live_delivery_mode_passes_dry_run_false_to_connector() -> None:
+    session = _session()
+    try:
+        briefing = _briefing()
+        _add(session, briefing)
+        connector = SpyConnector()
+        live_settings = {**SETTINGS, "DELIVERY_MODE": "live"}
+
+        deliver_briefing(
+            session,
+            briefing,
+            connector=connector,
+            settings=live_settings,
+        )
+
+        assert connector.sent == [("# briefing\nbriefing-1", False)]
+    finally:
+        _close(session)
+
+
 def test_duplicate_success_is_rejected_before_connector_calls() -> None:
     session = _session()
     try:

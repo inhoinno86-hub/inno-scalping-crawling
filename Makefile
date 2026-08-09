@@ -6,7 +6,7 @@ PYTHON ?= $(VENV_PYTHON)
 endif
 PYTEST ?= $(PYTHON) -m pytest
 
-.PHONY: test run-briefing run-briefing-cycle review-api run-briefing-cycle-live-llm
+.PHONY: test run-briefing run-briefing-cycle review-api run-briefing-cycle-live-llm run-briefing-cycle-live
 
 test:
 	PYTHONPATH=src $(PYTEST) -q
@@ -28,6 +28,15 @@ run-briefing-cycle:
 run-briefing-cycle-live-llm:
 	LLM_MODE=live LLM_MONTHLY_BUDGET_USD=0 LLM_RUN_MAX_TOKENS=2000 \
 	PYTHONPATH=src $(PYTHON) -c "from scalping_briefing import run_briefing_cycle; raise SystemExit(run_briefing_cycle(approvals=['llm_live']))"
+
+# Full live cycle: local Ollama extraction AND a real Telegram send
+# (TelegramLiveConnector, selected because DELIVERY_MODE=live). Requires
+# TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID in the process environment (e.g.
+# `export $(grep -v '^#' .env | xargs)` first) -- this target does not read
+# .env itself, there is no dotenv loader in this project by design.
+run-briefing-cycle-live:
+	LLM_MODE=live LLM_MONTHLY_BUDGET_USD=0 LLM_RUN_MAX_TOKENS=2000 DELIVERY_MODE=live \
+	PYTHONPATH=src $(PYTHON) -c "from scalping_briefing import run_briefing_cycle; raise SystemExit(run_briefing_cycle(approvals=['llm_live', 'delivery_live']))"
 
 review-api:
 	PYTHONPATH=src $(PYTHON) -c "from scalping_briefing import run_review_api; raise SystemExit(run_review_api())"

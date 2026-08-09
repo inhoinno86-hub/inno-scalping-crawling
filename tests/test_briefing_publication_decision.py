@@ -197,6 +197,76 @@ def test_cli_decides_and_then_delivers_the_approved_briefing(tmp_path, capsys, m
         engine.dispose()
 
 
+def test_cli_delivers_live_only_with_approve_live_flag(tmp_path, capsys, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("DELIVERY_MODE", "live")
+    engine = _database(tmp_path)
+    url = f"sqlite:///{tmp_path / 'review.db'}"
+
+    created: list[object] = []
+
+    class RecordingLiveConnector:
+        channel = "telegram"
+
+        def __init__(self, **kwargs: object) -> None:
+            created.append(kwargs)
+
+        def render(self, payload: object) -> str:
+            return "rendered"
+
+        def send(self, message: str, *, dry_run: bool):
+            from scalping_briefing.delivery.connector import DeliveryAttemptResult
+
+            assert dry_run is False
+            return DeliveryAttemptResult(
+                channel=self.channel,
+                content_hash="deadbeef",
+                status="success",
+                dry_run=False,
+            )
+
+    import scalping_briefing.delivery.connector as connector_module
+
+    monkeypatch.setattr(connector_module, "TelegramLiveConnector", RecordingLiveConnector)
+    try:
+        with Session(engine) as session:
+            briefing = _briefing(session)
+            briefing.markdown_location = str(tmp_path / "briefing.md")
+            Path(briefing.markdown_location).write_text(
+                "# 브리핑\n\n- 승인 항목 없음\n", encoding="utf-8"
+            )
+            session.commit()
+
+        assert review_cli(
+            [
+                "--db",
+                url,
+                "briefing-decide",
+                "briefing-1",
+                "--reviewer-id",
+                "operator-1",
+                "--decision",
+                "approved",
+            ]
+        ) == 0
+        capsys.readouterr()
+
+        # Without --approve-live, config.load_config fails closed even with
+        # DELIVERY_MODE=live already set -- approval is a call argument.
+        assert review_cli(["--db", url, "briefing-deliver", "briefing-1"]) == 1
+        assert "approval" in capsys.readouterr().out
+        assert created == []
+
+        assert review_cli(
+            ["--db", url, "briefing-deliver", "briefing-1", "--approve-live"]
+        ) == 0
+        delivered = capsys.readouterr().out
+        assert '"status": "success"' in delivered
+        assert len(created) == 1
+    finally:
+        engine.dispose()
+
+
 def test_cli_refuses_to_deliver_a_briefing_that_was_never_approved(tmp_path, capsys, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     engine = _database(tmp_path)

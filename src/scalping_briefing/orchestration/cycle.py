@@ -12,7 +12,7 @@ from types import SimpleNamespace
 from typing import Any, TypeVar
 
 from .. import alerts
-from ..delivery.connector import TelegramDryRunConnector
+from ..delivery.connector import TelegramDryRunConnector, TelegramLiveConnector
 from ..delivery.service import deliver_briefing
 from ..logging_setup import mask_secrets
 from ..ops.alerting import emit_metric_alerts
@@ -718,14 +718,6 @@ def _invalid_validation_state(state: str | None) -> Any:
     )
 
 
-def _reject_live_delivery() -> Any:
-    """Raise the cycle-level blocker for the intentionally unsupported mode."""
-
-    raise RuntimeError(
-        "delivery blocked: only DELIVERY_MODE=dry_run is supported"
-    )
-
-
 def run_candidate_stages(
     session: Any,
     document_versions: Sequence[Any],
@@ -1035,7 +1027,7 @@ def run_cycle(
         )
         gate_succeeded = gated is not _STAGE_FAILED
 
-    if briefing is not None and gate_succeeded and summary.delivery_mode == "dry_run":
+    if briefing is not None and gate_succeeded:
         delivery_result = run_stage(
             summary,
             "delivery",
@@ -1059,15 +1051,6 @@ def run_cycle(
             # zero-item briefing.  Preserve that service contract; do not
             # invent a successful Delivery status.
             summary.delivery_status = None
-    elif briefing is not None and gate_succeeded:
-        run_stage(
-            summary,
-            "delivery",
-            summary.briefing_id or "cycle",
-            _reject_live_delivery,
-            alerts_dir=alerts_dir,
-        )
-        summary.delivery_status = "skipped"
 
     _run_operational_stages(
         session,
@@ -1086,6 +1069,20 @@ def run_cycle(
     return summary
 
 
+def _delivery_connector_for_settings(settings: Any) -> Any:
+    """Choose a connector to match ``DELIVERY_MODE``, defaulting to dry-run.
+
+    Sole assembly point for :class:`TelegramLiveConnector`. Mirrors
+    ``_llm_client_for_settings`` in ``scalping_briefing.__init__``: a
+    fixture-default ``DELIVERY_MODE`` (or one absent from a lightweight
+    settings double) keeps the prior default behavior unchanged.
+    """
+
+    if _delivery_mode(settings) == "live":
+        return TelegramLiveConnector(settings=settings)
+    return TelegramDryRunConnector(settings=settings)
+
+
 def _deliver_once(
     session: Any,
     briefing: Any,
@@ -1098,7 +1095,7 @@ def _deliver_once(
 
     selected_connector = connector
     if selected_connector is None:
-        selected_connector = TelegramDryRunConnector(settings=settings)
+        selected_connector = _delivery_connector_for_settings(settings)
     summary.delivery_invoked = True
     return deliver_briefing(
         session,

@@ -1,4 +1,9 @@
-"""Orchestrate gated, idempotent dry-run briefing delivery."""
+"""Orchestrate gated, idempotent briefing delivery.
+
+Dry-run by default; live only when the connector is a live provider and
+settings explicitly opt in via ``DELIVERY_MODE=live`` (see
+``_delivery_dry_run``).
+"""
 
 from __future__ import annotations
 
@@ -74,6 +79,19 @@ def _setting(settings: Any, name: str, default: Any = None) -> Any:
     if isinstance(settings, Mapping):
         return settings.get(name, default)
     return getattr(settings, name, default)
+
+
+def _delivery_dry_run(settings: Any) -> bool:
+    """``False`` only when settings explicitly opt into ``DELIVERY_MODE=live``.
+
+    A live-capable connector still decides for itself whether to perform a
+    real send (see ``TelegramLiveConnector``); this only carries the signal
+    down instead of hardcoding it, so a live connector actually has one to
+    read.
+    """
+
+    mode = str(_setting(settings, "DELIVERY_MODE", "dry_run") or "dry_run")
+    return mode.strip().lower() != "live"
 
 
 def _records(value: Any) -> list[Any]:
@@ -391,7 +409,7 @@ def deliver_briefing(
         resend_approved_by=resend_approved_by,
     )
 
-    result = connector.send(message, dry_run=True)
+    result = connector.send(message, dry_run=_delivery_dry_run(settings))
     attempted_at = _result_value(result, "attempted_at", None) or utc_now()
     delivery = _existing_delivery(history, idempotency_key)
     if delivery is None:

@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 
 from sqlalchemy import select
 
@@ -290,7 +291,9 @@ def test_gate_failure_blocks_connector_but_runs_later_operational_stages(
     assert "alerting" in calls
 
 
-def test_live_delivery_mode_does_not_invoke_delivery(monkeypatch, tmp_path: Path) -> None:
+def test_live_delivery_mode_assembles_live_connector_and_invokes_delivery(
+    monkeypatch, tmp_path: Path
+) -> None:
     calls: list[str] = []
     _wire_cycle(monkeypatch, calls, _payload())
     _wire_ops(monkeypatch, calls, tmp_path)
@@ -298,13 +301,26 @@ def test_live_delivery_mode_does_not_invoke_delivery(monkeypatch, tmp_path: Path
     monkeypatch.setattr(
         cycle,
         "TelegramDryRunConnector",
-        lambda **_kwargs: (_ for _ in ()).throw(AssertionError("connector created")),
+        lambda **_kwargs: (_ for _ in ()).throw(
+            AssertionError("dry-run connector created in live mode")
+        ),
     )
-    monkeypatch.setattr(
-        cycle,
-        "deliver_briefing",
-        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("delivery called")),
-    )
+
+    created: list[object] = []
+
+    class RecordingLiveConnector:
+        def __init__(self, **kwargs: object) -> None:
+            created.append(kwargs)
+
+    monkeypatch.setattr(cycle, "TelegramLiveConnector", RecordingLiveConnector)
+
+    delivered: list[object] = []
+
+    def deliver(*args: object, **kwargs: object) -> Any:
+        delivered.append((args, kwargs))
+        return SimpleNamespace(status="success")
+
+    monkeypatch.setattr(cycle, "deliver_briefing", deliver)
 
     live_settings = {**SETTINGS, "DELIVERY_MODE": "live"}
     summary = run_cycle(
@@ -315,8 +331,10 @@ def test_live_delivery_mode_does_not_invoke_delivery(monkeypatch, tmp_path: Path
         report_output_dir=tmp_path / "reports",
     )
 
-    assert summary.delivery_invoked is False
-    assert summary.delivery_status == "skipped"
+    assert summary.delivery_invoked is True
+    assert summary.delivery_status == "success"
+    assert len(created) == 1
+    assert len(delivered) == 1
 
 
 def test_same_trigger_leaves_one_briefing_and_delivery_row(monkeypatch, tmp_path: Path) -> None:

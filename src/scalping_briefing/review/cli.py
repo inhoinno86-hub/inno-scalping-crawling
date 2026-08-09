@@ -171,27 +171,44 @@ def build_parser() -> argparse.ArgumentParser:
         dest="resend_approved_by",
         help="reviewer who approved a repeated delivery",
     )
+    briefing_deliver_parser.add_argument(
+        "--approve-live",
+        dest="approve_live",
+        action="store_true",
+        help=(
+            "explicitly approve DELIVERY_MODE=live for this invocation "
+            "(required by config.load_config's fail-closed live gate; a real "
+            "send is only attempted when DELIVERY_MODE=live is also set)"
+        ),
+    )
     return parser
 
 
 def _deliver_briefing(session: Session, args: argparse.Namespace) -> Any:
-    """Gate and dry-run deliver one already-built, operator-approved briefing.
+    """Gate and deliver one already-built, operator-approved briefing.
 
     Delivery deliberately reuses the stored briefing instead of rebuilding it:
     a rebuild resets the publication status, because rebuilt content is not
-    what the operator approved.
+    what the operator approved. Sends live only when DELIVERY_MODE=live and
+    --approve-live were both given; otherwise this is dry-run, same as
+    before --approve-live existed.
     """
 
-    from scalping_briefing.delivery.connector import TelegramDryRunConnector
+    from scalping_briefing.delivery.connector import (
+        TelegramDryRunConnector,
+        TelegramLiveConnector,
+    )
     from scalping_briefing.delivery.service import deliver_briefing
     from scalping_briefing.models import Briefing
 
-    settings = load_config()
+    approvals = ["delivery_live"] if getattr(args, "approve_live", False) else None
+    settings = load_config(approvals=approvals) if approvals else load_config()
     mode = str(getattr(settings, "DELIVERY_MODE", "dry_run") or "dry_run")
-    if mode != "dry_run":
-        raise ValueError(
-            "only DELIVERY_MODE=dry_run delivery is supported from the review CLI"
-        )
+    connector = (
+        TelegramLiveConnector(settings=settings)
+        if mode == "live"
+        else TelegramDryRunConnector(settings=settings)
+    )
 
     briefing = session.get(Briefing, args.briefing_id)
     if briefing is None:
@@ -203,7 +220,7 @@ def _deliver_briefing(session: Session, args: argparse.Namespace) -> Any:
     delivery = deliver_briefing(
         session,
         briefing,
-        connector=TelegramDryRunConnector(settings=settings),
+        connector=connector,
         settings=settings,
         resend_reason=args.resend_reason,
         resend_approved_by=args.resend_approved_by,
