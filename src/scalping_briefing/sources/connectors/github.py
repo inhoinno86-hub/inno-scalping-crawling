@@ -221,8 +221,12 @@ class GitHubConnector:
             raise ConnectorError("GitHub source requires base_url")
         selected_releases_url = releases_url or response_url
         if selected_releases_url is None:
-            selected_releases_url = base
-        selected_readme_url = readme_url or _endpoint(base, "readme.json")
+            selected_releases_url = source_value(self.source, "releases_url", None) or base
+        selected_readme_url = (
+            readme_url
+            or source_value(self.source, "readme_url", None)
+            or _endpoint(base, "readme.json")
+        )
         headers = {
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",

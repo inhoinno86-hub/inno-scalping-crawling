@@ -63,6 +63,8 @@
     "trust_tier": {"type": "string", "enum": ["tier_1", "tier_2", "tier_3", "unknown"]},
     "error_state": {"type": ["object", "null"]},
     "original_url": {"type": "string", "format": "uri"},
+    "releases_url": {"type": "string", "format": "uri"},
+    "readme_url": {"type": "string", "format": "uri"},
     "metadata": {"type": "object"}
   }
 }
