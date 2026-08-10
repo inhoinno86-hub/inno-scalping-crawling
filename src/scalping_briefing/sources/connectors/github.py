@@ -5,10 +5,13 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import logging
+import os
 from collections.abc import Mapping
 from datetime import date, datetime
 from typing import Any
 
+from scalping_briefing.logging_setup import log_event
 from scalping_briefing.sources.registry import (
     ConnectorError,
     ConnectorResult,
@@ -23,6 +26,9 @@ from scalping_briefing.sources.registry import (
     source_value,
     update_source_cursor,
 )
+
+_LOGGER = logging.getLogger(__name__)
+GITHUB_API_TOKEN_ENV = "GITHUB_API_TOKEN"
 
 
 def _request(
@@ -221,6 +227,20 @@ class GitHubConnector:
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",
         }
+        token = os.environ.get(GITHUB_API_TOKEN_ENV)
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+        else:
+            log_event(
+                _LOGGER,
+                logging.WARNING,
+                "github_api_token_missing",
+                source_id=source_id(self.source),
+                detail=(
+                    f"{GITHUB_API_TOKEN_ENV} is not set; proceeding unauthenticated "
+                    "against a lower GitHub API rate limit"
+                ),
+            )
 
         releases_response = _request(
             self.transport, selected_releases_url, headers, self.settings

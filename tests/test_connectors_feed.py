@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 import json
+import logging
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
 
 from scalping_briefing.net.transport import TransportResponse
-from scalping_briefing.sources.connectors.github import GitHubConnector
+from scalping_briefing.sources.connectors.github import (
+    GITHUB_API_TOKEN_ENV,
+    GitHubConnector,
+)
 from scalping_briefing.sources.connectors.html_docs import HTMLDocumentConnector
 from scalping_briefing.sources.connectors.json_meta import JSONMetadataConnector
 from scalping_briefing.sources.connectors.rss_atom import RSSAtomConnector
@@ -52,6 +56,55 @@ def test_registry_uses_policy_connector_mapping_and_rejects_inactive_before_requ
     assert isinstance(registry.connector_for("real_exchange_docs"), HTMLDocumentConnector)
     with pytest.raises(SourceInactiveError, match="active is false"):
         registry.collect("real_arxiv_api", transport=ResponseQueue())
+
+
+def _github_transport() -> ResponseQueue:
+    fixture_dir = FIXTURES / "fixture_github_repo"
+    return ResponseQueue(
+        response(fixture_dir / "releases.json", content_type="application/json"),
+        response(fixture_dir / "readme.json", content_type="application/json"),
+    )
+
+
+def test_github_connector_adds_bearer_authorization_header_when_token_env_set(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv(GITHUB_API_TOKEN_ENV, "test-only-token-value")
+    transport = _github_transport()
+    connector = GitHubConnector(
+        {"source_id": "test_github_repo", "base_url": "https://api.github.com/repos/example/x"},
+        transport,
+    )
+
+    connector.collect()
+
+    assert len(transport.calls) == 2
+    for _url, headers in transport.calls:
+        assert headers["Authorization"] == "Bearer test-only-token-value"
+
+
+def test_github_connector_omits_authorization_and_warns_when_token_env_unset(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    monkeypatch.delenv(GITHUB_API_TOKEN_ENV, raising=False)
+    transport = _github_transport()
+    connector = GitHubConnector(
+        {"source_id": "test_github_repo", "base_url": "https://api.github.com/repos/example/x"},
+        transport,
+    )
+
+    with caplog.at_level(logging.WARNING):
+        connector.collect()
+
+    assert len(transport.calls) == 2
+    for _url, headers in transport.calls:
+        assert "Authorization" not in headers
+    assert any(
+        record.message == "github_api_token_missing" for record in caplog.records
+    )
+    # The warning may name the missing env var but must never contain a token value.
+    assert "Bearer" not in caplog.text
 
 
 def test_rss_fixture_parses_and_deduplicates_with_initial_lookback() -> None:
