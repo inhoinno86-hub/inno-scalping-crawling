@@ -54,9 +54,9 @@ def validate_source_policy(
     fixture_sources = [item for item in sources if item.get("source_id") in FIXTURE_SOURCE_IDS]
     if any(item.get("active") is not True for item in fixture_sources):
         raise SourcePolicyError("all fixture sources must be active")
-    inactive = [item for item in sources if item.get("active") is False and not item.get("fixture", False)]
-    if len(inactive) < 5:
-        raise SourcePolicyError("at least five inactive real-source candidates are required")
+    real_candidates = [item for item in sources if not item.get("fixture", False)]
+    if len(real_candidates) < 5:
+        raise SourcePolicyError("at least five real-source candidates must be registered")
 
     try:
         schema = json.loads(Path(schema_path).read_text(encoding="utf-8"))

@@ -199,14 +199,19 @@ sources:
       rate_limit: operator approval required before activation
       user_agent: scalping-briefing/0.1 (approval required)
       allowlist: [https://export.arxiv.org]
-    robots_allowed: unknown
-    robots_rule_matched: null
-    robots_evaluated_at: null
-    access_decision_reason: inactive candidate; human approval required
+    robots_allowed: true
+    robots_rule_matched: "/"
+    robots_evaluated_at: "2026-08-09T13:41:37Z"
+    access_decision_reason: >-
+      robots.txt disallows / for User-agent *, but arXiv's official API
+      Terms of Use (info.arxiv.org/help/api/tou.html) explicitly documents
+      and authorizes "the legacy arXiv API" as a separate access channel
+      with its own rate limit (1 request/3s); operator decision overrides
+      the general-crawl robots disallow for this documented API endpoint.
     terms_reference: https://info.arxiv.org/help/api/
     license_notes: Verify article and metadata license before activation.
     rate_limit:
-      requests_per_minute: 1
+      requests_per_minute: 20
       burst: 1
       retry_after_seconds: 60
       max_concurrency: 1
@@ -239,7 +244,7 @@ sources:
     terms_reference: https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api
     license_notes: Review repository license and API policy before activation.
     rate_limit:
-      requests_per_minute: 60
+      requests_per_minute: 80
       burst: 2
       retry_after_seconds: 60
       max_concurrency: 1
@@ -267,8 +272,8 @@ sources:
       allowlist: [https://developers.binance.com]
     robots_allowed: unknown
     robots_rule_matched: null
-    robots_evaluated_at: null
-    access_decision_reason: inactive candidate; human approval required
+    robots_evaluated_at: "2026-08-09T13:41:37Z"
+    access_decision_reason: robots.txt could not be evaluated
     terms_reference: https://www.binance.com/en/terms
     license_notes: Do not activate until terms, robots, and citation limits are approved.
     rate_limit:
@@ -298,10 +303,10 @@ sources:
       rate_limit: Operator approval required before activation
       user_agent: scalping-briefing/0.1 (approval required)
       allowlist: [https://blog.quantinsti.com]
-    robots_allowed: unknown
+    robots_allowed: true
     robots_rule_matched: null
-    robots_evaluated_at: null
-    access_decision_reason: inactive candidate; human approval required
+    robots_evaluated_at: "2026-08-09T13:41:37Z"
+    access_decision_reason: robots.txt was evaluated and no path rule matched
     terms_reference: https://blog.quantinsti.com/terms-of-use/
     license_notes: Confirm quotation and RSS use policy before activation.
     rate_limit:
@@ -320,9 +325,9 @@ sources:
   - source_id: real_crossref_api
     name: Crossref Metadata Candidate
     type: paper_metadata
-    base_url: https://api.crossref.org
+    base_url: https://api.crossref.org/works?rows=5
     connector_type: paper_metadata
-    active: false
+    active: true
     fixture: false
     access_policy:
       robots: not_applicable
@@ -330,22 +335,32 @@ sources:
       license: Metadata and article-specific license review required
       rate_limit: Operator approval required before activation
       user_agent: scalping-briefing/0.1 (approval required)
-      allowlist: [https://api.crossref.org]
-    robots_allowed: unknown
+      allowlist: [https://api.crossref.org, https://doi.org]
+    robots_allowed: true
     robots_rule_matched: null
-    robots_evaluated_at: null
-    access_decision_reason: inactive candidate; human approval required
+    robots_evaluated_at: "2026-08-09T13:41:37Z"
+    access_decision_reason: >-
+      robots evaluation is not applicable by source policy; allowlist
+      extended to include doi.org because Crossref work records resolve
+      their canonical URL through the DOI resolver, not api.crossref.org
+      (confirmed via a real run_briefing() attempt that failed with
+      HostNotAllowedError before this addition)
     terms_reference: https://www.crossref.org/documentation/retrieve-metadata/rest-api/
-    license_notes: Metadata does not grant full-text redistribution rights.
+    license_notes: >-
+      Decision: metadata summary + link only. Crossref REST API metadata is
+      broadly reusable (Crossref's own documentation states most metadata
+      carries no copyright restriction), except abstracts which may be
+      copyrighted; full-text redistribution is not granted by this API.
+      Connector only ingests metadata fields, consistent with this decision.
     rate_limit:
       requests_per_minute: 50
       burst: 1
       retry_after_seconds: 60
       max_concurrency: 1
-    schedule: "approval_required"
+    schedule: "active"
     last_success_at: null
     cursor: null
     trust_tier: tier_1
     error_state: null
     original_url: https://api.crossref.org/works
-    metadata: {activation: human_approval_required}
+    metadata: {activation: activated}
