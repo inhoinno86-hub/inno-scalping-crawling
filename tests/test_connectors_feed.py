@@ -21,6 +21,8 @@ from scalping_briefing.sources.registry import (
 )
 from scalping_briefing.sources.window import calculate_collection_window
 
+from conftest import build_fixture_only_registry
+
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures" / "sources"
@@ -47,7 +49,7 @@ def empty_response(*, status: int, content_type: str, **headers: str) -> Transpo
 
 
 def test_registry_uses_policy_connector_mapping_and_rejects_inactive_before_request() -> None:
-    registry = SourceRegistry()
+    registry = build_fixture_only_registry()
     assert isinstance(registry.connector_for("fixture_rss_blog"), RSSAtomConnector)
     assert isinstance(registry.connector_for("real_arxiv_api"), RSSAtomConnector)
     assert isinstance(registry.connector_for("fixture_github_repo"), GitHubConnector)

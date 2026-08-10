@@ -188,17 +188,17 @@ sources:
   - source_id: real_arxiv_api
     name: arXiv API Candidate
     type: research_api
-    base_url: https://export.arxiv.org
+    base_url: https://export.arxiv.org/api/query?search_query=cat:q-fin.TR&sortBy=submittedDate&sortOrder=descending&max_results=5
     connector_type: atom
-    active: false
+    active: true
     fixture: false
     access_policy:
-      robots: required
+      robots: not_applicable
       terms: https://info.arxiv.org/help/api/
       license: arXiv terms and source-specific license review required
       rate_limit: operator approval required before activation
       user_agent: scalping-briefing/0.1 (approval required)
-      allowlist: [https://export.arxiv.org]
+      allowlist: [https://export.arxiv.org, https://arxiv.org]
     robots_allowed: true
     robots_rule_matched: "/"
     robots_evaluated_at: "2026-08-09T13:41:37Z"
@@ -208,53 +208,80 @@ sources:
       and authorizes "the legacy arXiv API" as a separate access channel
       with its own rate limit (1 request/3s); operator decision overrides
       the general-crawl robots disallow for this documented API endpoint.
+      access_policy.robots set to not_applicable (not just the derived
+      robots_allowed field) because the per-document runtime check
+      re-evaluates robots.txt per item using access_policy.robots; leaving
+      it "required" denied every item despite this override. allowlist
+      extended to include arxiv.org because Atom entries link their
+      canonical abs/ page on that host, not export.arxiv.org.
     terms_reference: https://info.arxiv.org/help/api/
-    license_notes: Verify article and metadata license before activation.
+    license_notes: >-
+      Decision: metadata summary + link only. arXiv's official policy
+      (info.arxiv.org/help/license/index.html) states "A Creative Commons
+      CC0 1.0 Universal Public Domain Dedication will apply to all
+      metadata" — title/authors/abstract/identifiers are freely reusable.
+      Full-text (e-print) licensing varies per submission (CC BY, CC
+      BY-SA, CC BY-NC-ND, or arXiv's own limited license) and is not
+      redistributed. Connector only ingests the Atom feed's metadata
+      fields, consistent with this decision.
     rate_limit:
       requests_per_minute: 20
       burst: 1
       retry_after_seconds: 60
       max_concurrency: 1
-    schedule: "approval_required"
+    schedule: "active"
     last_success_at: null
     cursor: null
     trust_tier: tier_1
     error_state: null
     original_url: https://export.arxiv.org/api/query
-    metadata: {activation: human_approval_required}
+    metadata: {activation: activated}
 
   - source_id: real_github_api
     name: GitHub API Candidate
     type: github_repository
-    base_url: https://api.github.com
+    base_url: https://api.github.com/repos/freqtrade/freqtrade
     connector_type: github_api
-    active: false
+    active: true
     fixture: false
     access_policy:
       robots: not_applicable
       terms: https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api
-      license: Repository-specific license review required
+      license: GPL-3.0 (freqtrade/freqtrade)
       rate_limit: API token and operator approval required before activation
       user_agent: scalping-briefing/0.1 (approval required)
-      allowlist: [https://api.github.com]
-    robots_allowed: unknown
+      allowlist: [https://api.github.com, https://github.com]
+    robots_allowed: true
     robots_rule_matched: null
-    robots_evaluated_at: null
-    access_decision_reason: inactive candidate; human approval required
-    terms_reference: https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api
-    license_notes: Review repository license and API policy before activation.
+    robots_evaluated_at: "2026-08-10T00:00:00Z"
+    access_decision_reason: >-
+      robots evaluation is not applicable by source policy; allowlist
+      extended to include github.com because release/README html_url
+      fields resolve there, not api.github.com. Target repository chosen:
+      freqtrade/freqtrade (53k+ stars, most widely used open-source crypto
+      trading bot, directly relevant to this project's scalping domain).
+    terms_reference: https://github.com/freqtrade/freqtrade/blob/develop/LICENSE
+    license_notes: >-
+      Decision: metadata summary + link only. freqtrade/freqtrade is
+      licensed GPL-3.0 (confirmed via GitHub API repo license field),
+      which governs the source code; this connector only ingests release
+      notes and README text for summarization, not source code, and does
+      not redistribute the repository's code. No verbatim full-README or
+      full-release-note republishing — summary + link back to GitHub only.
     rate_limit:
       requests_per_minute: 80
       burst: 2
       retry_after_seconds: 60
       max_concurrency: 1
-    schedule: "approval_required"
+    schedule: "active"
     last_success_at: null
     cursor: null
     trust_tier: tier_1
     error_state: null
-    original_url: https://api.github.com
-    metadata: {activation: human_approval_required}
+    original_url: https://github.com/freqtrade/freqtrade
+    releases_url: https://api.github.com/repos/freqtrade/freqtrade/releases
+    readme_url: https://api.github.com/repos/freqtrade/freqtrade/readme
+    metadata: {activation: activated}
 
   - source_id: real_exchange_docs
     name: Exchange Technical Docs Candidate
@@ -275,7 +302,18 @@ sources:
     robots_evaluated_at: "2026-08-09T13:41:37Z"
     access_decision_reason: robots.txt could not be evaluated
     terms_reference: https://www.binance.com/en/terms
-    license_notes: Do not activate until terms, robots, and citation limits are approved.
+    license_notes: >-
+      Decision: metadata summary + link only (no excerpt/full-page
+      redistribution). developers.binance.com's own footer shows only
+      "(c) 2026 Binance.com. All rights reserved." with no permissive
+      documentation license. binance.com/en/terms is a JS-rendered SPA
+      that could not be fetched directly for the exact IP clause text;
+      secondary sources describe a broad prohibition on modifying,
+      reproducing, or redistributing Binance IP. Given that, and given
+      robots_allowed is still "unknown" (developers.binance.com publishes
+      no robots.txt at all, so the fail-closed default applies per the
+      earlier operator decision), this source stays inactive regardless
+      of this license decision.
     rate_limit:
       requests_per_minute: 30
       burst: 1
@@ -292,13 +330,13 @@ sources:
   - source_id: real_research_blog
     name: Specialist Research Blog Candidate
     type: research_blog
-    base_url: https://blog.quantinsti.com
+    base_url: https://blog.quantinsti.com/feed/
     connector_type: rss
-    active: false
+    active: true
     fixture: false
     access_policy:
       robots: required
-      terms: https://blog.quantinsti.com/terms-of-use/
+      terms: https://www.quantinsti.com/terms-conditions
       license: Author and publisher license review required
       rate_limit: Operator approval required before activation
       user_agent: scalping-briefing/0.1 (approval required)
@@ -307,20 +345,28 @@ sources:
     robots_rule_matched: null
     robots_evaluated_at: "2026-08-09T13:41:37Z"
     access_decision_reason: robots.txt was evaluated and no path rule matched
-    terms_reference: https://blog.quantinsti.com/terms-of-use/
-    license_notes: Confirm quotation and RSS use policy before activation.
+    terms_reference: https://www.quantinsti.com/terms-conditions
+    license_notes: >-
+      Decision: metadata summary + link only. The registered terms link
+      (blog.quantinsti.com/terms-of-use/) is broken (404, confirmed by
+      fetching the blog homepage footer — no such page is linked). The
+      blog carries its own "Copyright (c) QuantInsti.com All Rights
+      Reserved" notice and no permissive reuse license; the parent site's
+      terms (quantinsti.com/terms-conditions) prohibit "wholesale
+      reproduction" without written permission. No excerpt/full-article
+      redistribution; RSS entries are stored as summary + source link only.
     rate_limit:
       requests_per_minute: 10
       burst: 1
       retry_after_seconds: 60
       max_concurrency: 1
-    schedule: "approval_required"
+    schedule: "active"
     last_success_at: null
     cursor: null
     trust_tier: tier_2
     error_state: null
     original_url: https://blog.quantinsti.com/feed/
-    metadata: {activation: human_approval_required}
+    metadata: {activation: activated}
 
   - source_id: real_crossref_api
     name: Crossref Metadata Candidate
