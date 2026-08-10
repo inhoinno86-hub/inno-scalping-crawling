@@ -929,12 +929,17 @@ def run_cycle(
     now: datetime | None = None,
     run_attempt: int = 1,
     llm_client: Any = None,
+    registry: Any = None,
 ) -> CycleSummary:
     """Run collection, candidate processing, briefing, gate, delivery, ops.
 
     ``llm_client`` is an opt-in override forwarded to the extraction stage
     (see :func:`run_candidate_stages`).  Leaving it unset reproduces prior
     behavior exactly.
+
+    ``registry`` is an opt-in override forwarded to the collect stage (see
+    :func:`collect_documents`).  Leaving it unset reproduces prior behavior
+    exactly.
     """
 
     if alerts_dir is None:
@@ -975,6 +980,7 @@ def run_cycle(
         lambda: collect_documents(
             session,
             settings=settings,
+            registry=registry,
             storage_root=Path("storage"),
         ),
         alerts_dir=alerts_dir,

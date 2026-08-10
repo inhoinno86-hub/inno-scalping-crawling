@@ -19,6 +19,8 @@ from scalping_briefing.config import load_config
 from scalping_briefing.models import Base, StrategyCandidate
 from scalping_briefing.orchestration.cycle import run_cycle
 
+from conftest import build_fixture_only_registry
+
 
 @pytest.fixture
 def offline_session(tmp_path: Path):
@@ -38,6 +40,7 @@ def _run(session: Session, tmp_path: Path):
         settings=load_config(),
         alerts_dir=tmp_path / "alerts",
         report_output_dir=tmp_path / "reports",
+        registry=build_fixture_only_registry(settings=load_config()),
     )
 
 
