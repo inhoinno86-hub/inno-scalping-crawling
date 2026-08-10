@@ -18,6 +18,8 @@ from scalping_briefing.delivery.guard import (
 )
 from scalping_briefing import run_briefing
 
+from conftest import isolate_source_policy
+
 
 ROOT = Path(__file__).resolve().parents[1]
 MAPPING = {
@@ -165,6 +167,7 @@ def test_run_briefing_is_fixture_dry_run(monkeypatch, tmp_path: Path, capsys) ->
     monkeypatch.setattr(socket, "socket", blocked_socket)
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path / 'app.sqlite3'}")
+    isolate_source_policy(monkeypatch)
 
     assert run_briefing() == 0
     payload = json.loads(capsys.readouterr().out)

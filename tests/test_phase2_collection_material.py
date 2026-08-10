@@ -13,6 +13,8 @@ from scalping_briefing.models import Base, Document
 from scalping_briefing.net.robots import evaluate_robots
 from scalping_briefing.pipeline.source_policy import load_source_policy
 
+from conftest import isolate_source_policy
+
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE_ROOT = ROOT / "tests" / "fixtures" / "sources"
@@ -74,6 +76,7 @@ def test_phase2_material_run_briefing_persists_four_sources_and_denies_exchange(
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path / 'app.sqlite3'}")
     monkeypatch.setenv("LLM_MODE", "fixture")
     monkeypatch.setenv("DELIVERY_MODE", "dry_run")
+    isolate_source_policy(monkeypatch)
 
     assert run_briefing() == 0
     payload = json.loads(capsys.readouterr().out)

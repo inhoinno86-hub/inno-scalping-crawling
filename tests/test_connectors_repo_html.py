@@ -18,6 +18,8 @@ from scalping_briefing.sources.registry import (
     SourceRecord,
     SourceRegistry,
 )
+
+from conftest import build_fixture_only_registry, isolate_source_policy
 from scalping_briefing.storage.files import LocalFileStorage
 
 
@@ -26,7 +28,7 @@ def test_all_five_fixture_sources_collect_with_sockets_blocked(monkeypatch) -> N
         raise AssertionError("fixture collection attempted a socket call")
 
     monkeypatch.setattr(socket, "socket", blocked_socket)
-    registry = SourceRegistry()
+    registry = build_fixture_only_registry()
     try:
         active = registry.active_sources
         assert len(active) == 5
@@ -181,6 +183,7 @@ def test_run_briefing_uses_registry_collection_and_evaluates_robots_before_stora
         return original_collect(self, source_id, **kwargs)
 
     monkeypatch.setattr(SourceRegistry, "collect", observed_collect)
+    isolate_source_policy(monkeypatch)
 
     assert run_briefing() == 0
     payload = json.loads(capsys.readouterr().out)
