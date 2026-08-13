@@ -28,7 +28,16 @@ from ..pipeline.validate import validate_extracted_candidate
 from ..pipeline.schedule import next_occurrence, schedule_trigger
 from ..publishing.briefing_build import build_briefing
 from ..publishing.briefing_gate import gate_briefing
+from ..review.service import ReviewService
 from .collect import collect_documents
+
+
+_AUTO_PUBLISH_REVIEWER_ID = "system:auto_publish"
+
+
+def _is_auto_publish(settings: Any) -> bool:
+    policy = _setting(settings, "publication_policy", "manual_approval")
+    return str(policy).strip().lower() == "auto_publish"
 
 
 STAGE_NAMES = (
@@ -997,6 +1006,16 @@ def run_cycle(
         now=now,
     )
 
+    if _is_auto_publish(settings):
+        review_service = ReviewService(session)
+        for candidate in review_service.list_candidates(status="needs_review"):
+            review_service.record_decision(
+                str(_field(candidate, "candidate_id")),
+                reviewer_id=_AUTO_PUBLISH_REVIEWER_ID,
+                decision="approved",
+                comment="auto-approved: publication_policy=auto_publish",
+            )
+
     briefing = run_stage(
         summary,
         "briefing",
@@ -1015,6 +1034,15 @@ def run_cycle(
         summary.briefing_id = str(
             _field(briefing, "briefing_id", summary.briefing_id)
         )
+        if _is_auto_publish(settings) and _field(
+            briefing, "publication_status"
+        ) == "pending_approval":
+            ReviewService(session).record_briefing_decision(
+                summary.briefing_id,
+                reviewer_id=_AUTO_PUBLISH_REVIEWER_ID,
+                decision="approved",
+                comment="auto-approved: publication_policy=auto_publish",
+            )
 
     gated = None
     gate_succeeded = False

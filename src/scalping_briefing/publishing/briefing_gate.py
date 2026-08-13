@@ -527,6 +527,19 @@ def _approved(record: object) -> bool:
         "status",
         default=_MISSING,
     )
+    if status is _MISSING:
+        # A raw BriefingItem row (as built by build_briefing/run_cycle, as
+        # opposed to a hand-built payload dict) carries no review_status of
+        # its own -- approval lives on the linked StrategyCandidate.
+        candidate = _field(record, "strategy_candidate", None)
+        if candidate is not None:
+            status = _first(
+                candidate,
+                "review_status",
+                "publication_status",
+                "status",
+                default=_MISSING,
+            )
     return isinstance(status, str) and status.strip().lower() in {
         "approved",
         "published",
