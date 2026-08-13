@@ -28,6 +28,11 @@ DEFAULT_BASE_URL = "http://127.0.0.1:11434"
 # took up to ~600s (see tests/test_phase2_local_llm_integration.py). A
 # shorter default (60s) timed out every real extraction call in this project.
 DEFAULT_TIMEOUT = 600.0
+# Ollama's own default keep_alive (5m) unloads the model between calls that
+# are spaced out by collection/scoring work elsewhere in a cycle, adding a
+# ~20s reload (observed: mostly load_duration) to every subsequent call.
+# 30m comfortably covers one cycle's worth of sequential extraction calls.
+DEFAULT_KEEP_ALIVE = "30m"
 MAX_ATTEMPTS = 2
 
 
@@ -40,11 +45,13 @@ class LocalLLMClient:
         base_url: str = DEFAULT_BASE_URL,
         timeout: float = DEFAULT_TIMEOUT,
         max_tokens: int | None = None,
+        keep_alive: str = DEFAULT_KEEP_ALIVE,
     ) -> None:
         self.model = model
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self.max_tokens = max_tokens
+        self.keep_alive = keep_alive
         self._last_prompt: str | None = None
         self._last_raw_responses: list[Mapping[str, Any]] | None = None
 
@@ -64,6 +71,7 @@ class LocalLLMClient:
             "stream": False,
             "format": "json",
             "options": options,
+            "keep_alive": self.keep_alive,
         }
         raw = self._post(payload)
         parsed = json.loads(raw["response"])
